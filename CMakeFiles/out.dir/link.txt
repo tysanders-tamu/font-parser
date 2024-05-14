@@ -1,0 +1,1 @@
+/usr/bin/c++ -rdynamic CMakeFiles/out.dir/main.cpp.o -o out  fmt/libfmt.a -lglfw 

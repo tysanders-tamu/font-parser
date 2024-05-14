@@ -1,0 +1,14 @@
+/home/ty/projects/fontParser/CMakeFiles/out.dir
+/home/ty/projects/fontParser/CMakeFiles/edit_cache.dir
+/home/ty/projects/fontParser/CMakeFiles/rebuild_cache.dir
+/home/ty/projects/fontParser/CMakeFiles/list_install_components.dir
+/home/ty/projects/fontParser/CMakeFiles/install.dir
+/home/ty/projects/fontParser/CMakeFiles/install/local.dir
+/home/ty/projects/fontParser/CMakeFiles/install/strip.dir
+/home/ty/projects/fontParser/fmt/CMakeFiles/fmt.dir
+/home/ty/projects/fontParser/fmt/CMakeFiles/edit_cache.dir
+/home/ty/projects/fontParser/fmt/CMakeFiles/rebuild_cache.dir
+/home/ty/projects/fontParser/fmt/CMakeFiles/list_install_components.dir
+/home/ty/projects/fontParser/fmt/CMakeFiles/install.dir
+/home/ty/projects/fontParser/fmt/CMakeFiles/install/local.dir
+/home/ty/projects/fontParser/fmt/CMakeFiles/install/strip.dir
