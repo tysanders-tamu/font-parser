@@ -1,102 +1,80 @@
-#define FMT_HEADER_ONLY
-
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <fmt/core.h>
-#include <climits>
+#include <arpa/inet.h>
 
 using namespace std;
 
-template <typename T>
-void printV_HEX(vector<T> inVec){
-    for (auto a: inVec){
-      printf("%x", a);
+// Define a struct to represent the table directory
+struct TableDirectory {
+    uint32_t sfntVersion;
+    uint16_t numTables;
+    uint16_t searchRange;
+    uint16_t entrySelector;
+    uint16_t rangeShift;
+};
+
+// Function to read a 32-bit unsigned integer from the file
+uint32_t readUint32(ifstream& file) {
+    uint32_t value;
+    file.read(reinterpret_cast<char*>(&value), sizeof(uint32_t));
+    return htonl(value);
+}
+
+// Function to read a 16-bit unsigned integer from the file
+uint16_t readUint16(ifstream& file) {
+    uint16_t value;
+    file.read(reinterpret_cast<char*>(&value), sizeof(uint16_t));
+    return htons(value);
+}
+
+// Function to read the table directory from the file
+TableDirectory readTableDirectory(ifstream& file) {
+    TableDirectory dir;
+    dir.sfntVersion = readUint32(file);
+    dir.numTables = readUint16(file);
+    dir.searchRange = readUint16(file);
+    dir.entrySelector = readUint16(file);
+    dir.rangeShift = readUint16(file);
+    return dir;
+}
+
+// Function to print the first 256 bytes of the file as hexadecimal
+void printFile256(ifstream& file) {
+    file.seekg(0); // Seek to the beginning of the file
+    unsigned char c;
+    for (int i = 0; i < 256; i++) {
+        file.read(reinterpret_cast<char*>(&c), sizeof(unsigned char));
+        printf("%02x ", c);
     }
     cout << endl;
 }
 
-//replace
-template <typename T>
-T swap_endian(T u)
-{
-    static_assert (CHAR_BIT == 8, "CHAR_BIT != 8");
-
-    union
-    {
-        T u;
-        unsigned char u8[sizeof(T)];
-    } source, dest;
-
-    source.u = u;
-
-    for (size_t k = 0; k < sizeof(T); k++)
-        dest.u8[k] = source.u8[sizeof(T) - k - 1];
-
-    return dest.u;
+void printTableDirectory(const TableDirectory& dir) {
+    fmt::print("SFNT version: {:#x}\n", dir.sfntVersion);
+    fmt::print("Num tables: {}\n", dir.numTables);
+    fmt::print("Search range: {}\n", dir.searchRange);
+    fmt::print("Entry selector: {}\n", dir.entrySelector);
+    fmt::print("Range shift: {}\n", dir.rangeShift);
 }
 
-struct tableDirectory
-{
-  uint32_t sfntVersion;
-  uint16_t numTables;
-  uint16_t searchRange;
-  uint16_t entrySelector;
-  uint16_t rangeShift;
-};
+int main() {
+    ifstream file("test.otf", ios::binary);
+    if (!file.is_open()) {
+        cerr << "Error opening file!" << endl;
+        return 1;
+    }
 
-uint32_t readBigEndianUint32(ifstream& file){
-  uint32_t value;
-  file.read( reinterpret_cast<char*>(&value), sizeof(uint32_t));
-  if (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__){
-    value = swap_endian<uint32_t>(value);
-  }
-  return value;
-}
+    // Read the table directory
+    TableDirectory dir = readTableDirectory(file);
 
-uint16_t readBigEndianUint16(ifstream& file){
-  uint16_t value;
-  file.read( reinterpret_cast<char*>(&value), sizeof(uint16_t));
-  if (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__){
-    reverse(reinterpret_cast<char*>(&value), reinterpret_cast<char*>(&value) + sizeof(uint16_t));
-  }
-  return value;
-}
+    // Print the SFNT version and the number of tables
+    printTableDirectory(dir);
 
-void printFile256(ifstream& file){
-  unsigned char c;
-  for (int i = 0; i < 256; i++){
-    file.read(reinterpret_cast<char*>(&c), sizeof(unsigned char));
-    printf("%02x ", c);
-  }
-  cout << endl;
-}
+    // Print the first 256 bytes of the file as hexadecimal
+    printFile256(file);
 
-
-tableDirectory readTableDirectory(ifstream& file){
-  file.seekg(0);
-  tableDirectory dir;
-  dir.sfntVersion = readBigEndianUint32(file);
-  dir.numTables = readBigEndianUint16(file);
-}
-
-int main(){
-
-  ifstream file("test.otf", ios::binary);
-  if (!file.is_open()) {
-      cerr << "Error opening file!" << endl;
-      return 1;
-  }
-  
-
-  // tableDirectory dir = readTableDirectory(file);
-
-  // cout << "SFNT version " << hex << dir.sfntVersion << endl;
-  // cout << "Num tables " << dir.numTables << endl;
-
-  // fmt::print("sfntVersion: {}\n", sfntVersion_char);
-  printFile256(file);
-
-  file.close();
-
+    file.close();
+    return 0;
 }
