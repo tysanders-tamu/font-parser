@@ -1,6 +1,9 @@
+#define FMT_HEADER_ONLY
+
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <fmt/core.h>
 
 using namespace std;
 
@@ -9,6 +12,21 @@ void printV_HEX(vector<T> inVec){
     for (auto a: inVec){
       printf("%x", a);
     }
+    cout << endl;
+}
+
+uint16_t readUInt16(vector<u_int8_t> &contents){
+  uint16_t result;
+  fmt::print("A: {}\n", static_cast<char>(contents.at(0)));
+  fmt::print("B: {}\n", static_cast<char>(contents.at(1)));
+
+  for (int i = 0; i < 8; i++){
+    fmt::print("Aa: {}\n", *(contents.begin() + i));
+  }
+
+  copy(contents.begin(), contents.begin()+1, &result);
+  //print out
+  fmt::print("result: {}\n", result);
 }
 
 int main(){
@@ -17,8 +35,7 @@ int main(){
   char inbuffer[256];
   int buf_size = 256;
   char c;
-  vector<uint32_t> contents;
-  int offset = 0;
+  vector<u_int8_t> contents;
 
   if ( FILE.is_open() ){
     while ( FILE.good() ){
@@ -27,10 +44,8 @@ int main(){
     }
   }
 
-  //collect sfnt version
-  vector<uint32_t> sfntVersion(contents.begin(), contents.begin() + 4);
-  offset += 4;
 
+  // fmt::print("sfntVersion: {}\n", sfntVersion_char);
   printV_HEX(contents);
 
 }
