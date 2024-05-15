@@ -31,8 +31,10 @@
 *.out
 *.app
 
-./CMakeCache.txt
-./cmake_install.cmake
-./Makefile
+/CMakeCache.txt
+/cmake_install.cmake
+/Makefile
 CMakeFiles/
-./out
+/out
+CMakeFiles/Makefile.cmake
+CMakeFiles/out.dir/depend.make
