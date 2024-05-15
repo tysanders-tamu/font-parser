@@ -5,47 +5,9 @@
 #include <arpa/inet.h>
 #include <inttypes.h>
 #include <GLFW/glfw3.h>
+#include "parserClass.hpp"
 
 using namespace std;
-
-// Define a struct to represent the table directory
-struct TableDirectory {
-    uint32_t sfntVersion;
-    uint16_t numTables;
-    uint16_t searchRange;
-    uint16_t entrySelector;
-    uint16_t rangeShift;
-};
-
-
-//TABLE RECORDS
-struct TableRecord {
-    uint32_t tag;
-    uint32_t checkSum;
-    uint32_t offset;  // offset TYPE
-    uint32_t length;
-};
-
-struct TableRecords {
-    vector<TableRecord> records;
-};
-
-
-//CMAP Specific
-struct encodingRecord {
-    uint16_t platformID;
-    uint16_t encodingID;
-    uint32_t offset; // offset TYPE
-};
-
-struct cmapHeader {
-    uint16_t version;
-    uint16_t numTables;
-    vector<encodingRecord> encodingRecords;
-};
-
-
-
 
 // hex to ascii printout
 void hex_to_ascii(uint32_t hex) {
@@ -150,79 +112,89 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 }
 
 int main() {
-    ifstream file("Helvetica.otf", ios::binary);
-    if (!file.is_open()) {
-        cerr << "Error opening file!" << endl;
-        return 1;
-    }
+  //substantiate class
+  string filename = "test.otf";
+  parserClass parser(filename);
+  parser.print_table_records();
+  cout << parser.tableDirectory.sfntVersion << endl;
+  cout << parser.tableDirectory.numTables << endl;
+  cout << parser.tableDirectory.searchRange << endl;
+  cout << parser.tableDirectory.entrySelector << endl;
+  cout << parser.tableDirectory.rangeShift << endl;
+  
+    // ifstream file("Helvetica.otf", ios::binary);
+    // if (!file.is_open()) {
+    //     cerr << "Error opening file!" << endl;
+    //     return 1;
+    // }
 
-    // Read the table directory
-    TableDirectory dir = readTableDirectory(file);
-    TableRecords records = readTableRecords(file, dir);
+    // // Read the table directory
+    // TableDirectory dir = readTableDirectory(file);
+    // TableRecords records = readTableRecords(file, dir);
 
-    // Print the SFNT version and the number of tables
-    printTableDirectory(dir);
-    printTableRecords(records);
+    // // Print the SFNT version and the number of tables
+    // printTableDirectory(dir);
+    // printTableRecords(records);
 
-    //get cmap
-    //get record entry for cmap
-    TableRecord cmapRecord;
-    //find relevant entry
-    for (const auto& record : records.records) {
-        if (record.tag == 0x636d6170) {
-            cmapRecord = record;
-            break;
-        }
-    }
+    // //get cmap
+    // //get record entry for cmap
+    // TableRecord cmapRecord;
+    // //find relevant entry
+    // for (const auto& record : records.records) {
+    //     if (record.tag == 0x636d6170) {
+    //         cmapRecord = record;
+    //         break;
+    //     }
+    // }
 
-    cmapHeader cmapHeader = readCmapHeader(file, cmapRecord.offset);
-    cout << "Cmap Header: " << cmapHeader.version << endl;
-    cout << "Cmap Header: " << cmapHeader.numTables << endl;
-    for (int i = 0; i < cmapHeader.numTables; i++) {
-        fmt::print("-------------------------\n");  
-        cout << "Platform ID: " << cmapHeader.encodingRecords[i].platformID << endl;
-        cout << "Encoding ID: " << cmapHeader.encodingRecords[i].encodingID << endl;
-        cout << "Offset: " << cmapHeader.encodingRecords[i].offset << endl;
-    }
+    // cmapHeader cmapHeader = readCmapHeader(file, cmapRecord.offset);
+    // cout << "Cmap Header: " << cmapHeader.version << endl;
+    // cout << "Cmap Header: " << cmapHeader.numTables << endl;
+    // for (int i = 0; i < cmapHeader.numTables; i++) {
+    //     fmt::print("-------------------------\n");  
+    //     cout << "Platform ID: " << cmapHeader.encodingRecords[i].platformID << endl;
+    //     cout << "Encoding ID: " << cmapHeader.encodingRecords[i].encodingID << endl;
+    //     cout << "Offset: " << cmapHeader.encodingRecords[i].offset << endl;
+    // }
 
-    file.close();
+    // file.close();
 
 
-    // glfw testing
-    if (!glfwInit())
-      {
-        fmt::print("Failed to initialize GLFW\n");
-      }
+    // // glfw testing
+    // if (!glfwInit())
+    //   {
+    //     fmt::print("Failed to initialize GLFW\n");
+    //   }
 
     
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    // glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+    // glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
     
 
-    GLFWwindow* window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
-    if (!window)
-      {
-        fmt::print("Failed to create window\n");
-        glfwTerminate();
-      }
+    // GLFWwindow* window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+    // if (!window)
+    //   {
+    //     fmt::print("Failed to create window\n");
+    //     glfwTerminate();
+    //   }
 
 
-    // /////////////////////////////////
-    // // OpenGL setup
-    glViewport(0, 0, 640, 480);
-    // /////////////////////////////////
+    // // /////////////////////////////////
+    // // // OpenGL setup
+    // // glViewport(0, 0, 640, 480);
+    // // /////////////////////////////////
 
-    glfwSetKeyCallback(window, key_callback);
-    glfwMakeContextCurrent(window);
+    // glfwSetKeyCallback(window, key_callback);
+    // glfwMakeContextCurrent(window);
 
-    while (!glfwWindowShouldClose(window))
-      {
-          glfwPollEvents();
-      }
+    // // while (!glfwWindowShouldClose(window))
+    // //   {
+    // //       glfwPollEvents();
+    // //   }
 
-    glfwDestroyWindow(window);
-    glfwTerminate();
-    return 0;
+    // glfwDestroyWindow(window);
+    // glfwTerminate();
+    // return 0;
 }
 
 

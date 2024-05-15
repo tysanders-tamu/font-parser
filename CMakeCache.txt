@@ -324,15 +324,6 @@ MyProject_IS_TOP_LEVEL:STATIC=ON
 //Value Computed by CMake
 MyProject_SOURCE_DIR:STATIC=/home/ty/projects/fontParser
 
-//Value Computed by CMake
-Project_BINARY_DIR:STATIC=/home/ty/projects/fontParser
-
-//Value Computed by CMake
-Project_IS_TOP_LEVEL:STATIC=ON
-
-//Value Computed by CMake
-Project_SOURCE_DIR:STATIC=/home/ty/projects/fontParser
-
 
 ########################
 # INTERNAL cache entries

@@ -187,29 +187,77 @@ fmt/fast:
 	$(MAKE) $(MAKESILENT) -f fmt/CMakeFiles/fmt.dir/build.make fmt/CMakeFiles/fmt.dir/build
 .PHONY : fmt/fast
 
-main.o: main.cpp.o
-.PHONY : main.o
+src/glyphClass.o: src/glyphClass.cpp.o
+.PHONY : src/glyphClass.o
 
 # target to build an object file
-main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/out.dir/build.make CMakeFiles/out.dir/main.cpp.o
-.PHONY : main.cpp.o
+src/glyphClass.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/out.dir/build.make CMakeFiles/out.dir/src/glyphClass.cpp.o
+.PHONY : src/glyphClass.cpp.o
 
-main.i: main.cpp.i
-.PHONY : main.i
+src/glyphClass.i: src/glyphClass.cpp.i
+.PHONY : src/glyphClass.i
 
 # target to preprocess a source file
-main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/out.dir/build.make CMakeFiles/out.dir/main.cpp.i
-.PHONY : main.cpp.i
+src/glyphClass.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/out.dir/build.make CMakeFiles/out.dir/src/glyphClass.cpp.i
+.PHONY : src/glyphClass.cpp.i
 
-main.s: main.cpp.s
-.PHONY : main.s
+src/glyphClass.s: src/glyphClass.cpp.s
+.PHONY : src/glyphClass.s
 
 # target to generate assembly for a file
-main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/out.dir/build.make CMakeFiles/out.dir/main.cpp.s
-.PHONY : main.cpp.s
+src/glyphClass.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/out.dir/build.make CMakeFiles/out.dir/src/glyphClass.cpp.s
+.PHONY : src/glyphClass.cpp.s
+
+src/main.o: src/main.cpp.o
+.PHONY : src/main.o
+
+# target to build an object file
+src/main.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/out.dir/build.make CMakeFiles/out.dir/src/main.cpp.o
+.PHONY : src/main.cpp.o
+
+src/main.i: src/main.cpp.i
+.PHONY : src/main.i
+
+# target to preprocess a source file
+src/main.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/out.dir/build.make CMakeFiles/out.dir/src/main.cpp.i
+.PHONY : src/main.cpp.i
+
+src/main.s: src/main.cpp.s
+.PHONY : src/main.s
+
+# target to generate assembly for a file
+src/main.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/out.dir/build.make CMakeFiles/out.dir/src/main.cpp.s
+.PHONY : src/main.cpp.s
+
+src/parserClass.o: src/parserClass.cpp.o
+.PHONY : src/parserClass.o
+
+# target to build an object file
+src/parserClass.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/out.dir/build.make CMakeFiles/out.dir/src/parserClass.cpp.o
+.PHONY : src/parserClass.cpp.o
+
+src/parserClass.i: src/parserClass.cpp.i
+.PHONY : src/parserClass.i
+
+# target to preprocess a source file
+src/parserClass.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/out.dir/build.make CMakeFiles/out.dir/src/parserClass.cpp.i
+.PHONY : src/parserClass.cpp.i
+
+src/parserClass.s: src/parserClass.cpp.s
+.PHONY : src/parserClass.s
+
+# target to generate assembly for a file
+src/parserClass.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/out.dir/build.make CMakeFiles/out.dir/src/parserClass.cpp.s
+.PHONY : src/parserClass.cpp.s
 
 # Help Target
 help:
@@ -225,9 +273,15 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... fmt"
 	@echo "... out"
-	@echo "... main.o"
-	@echo "... main.i"
-	@echo "... main.s"
+	@echo "... src/glyphClass.o"
+	@echo "... src/glyphClass.i"
+	@echo "... src/glyphClass.s"
+	@echo "... src/main.o"
+	@echo "... src/main.i"
+	@echo "... src/main.s"
+	@echo "... src/parserClass.o"
+	@echo "... src/parserClass.i"
+	@echo "... src/parserClass.s"
 .PHONY : help
 
 

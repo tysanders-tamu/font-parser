@@ -8,7 +8,9 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/ty/projects/fontParser/main.cpp" "CMakeFiles/out.dir/main.cpp.o" "gcc" "CMakeFiles/out.dir/main.cpp.o.d"
+  "/home/ty/projects/fontParser/src/glyphClass.cpp" "CMakeFiles/out.dir/src/glyphClass.cpp.o" "gcc" "CMakeFiles/out.dir/src/glyphClass.cpp.o.d"
+  "/home/ty/projects/fontParser/src/main.cpp" "CMakeFiles/out.dir/src/main.cpp.o" "gcc" "CMakeFiles/out.dir/src/main.cpp.o.d"
+  "/home/ty/projects/fontParser/src/parserClass.cpp" "CMakeFiles/out.dir/src/parserClass.cpp.o" "gcc" "CMakeFiles/out.dir/src/parserClass.cpp.o.d"
   )
 
 # Targets to which this target links.

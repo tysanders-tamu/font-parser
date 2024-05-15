@@ -193,4 +193,5 @@ CMakeFiles/out.dir/main.cpp.o: /home/ty/projects/fontParser/main.cpp \
  /usr/include/x86_64-linux-gnu/bits/types/struct_osockaddr.h \
  /usr/include/x86_64-linux-gnu/bits/in.h /usr/include/inttypes.h \
  /usr/include/GLFW/glfw3.h /usr/include/GL/gl.h /usr/include/GL/glext.h \
- /usr/include/KHR/khrplatform.h
+ /usr/include/KHR/khrplatform.h \
+ /home/ty/projects/fontParser/parserClass.hpp
