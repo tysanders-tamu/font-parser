@@ -1,1 +1,0 @@
-/usr/bin/c++ -rdynamic CMakeFiles/MyExecutable.dir/main.cpp.o -o MyExecutable  fmt/libfmt.a 

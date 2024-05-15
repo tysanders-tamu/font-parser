@@ -1,1 +1,1 @@
-/usr/bin/c++ -rdynamic CMakeFiles/out.dir/src/glyphClass.cpp.o CMakeFiles/out.dir/src/main.cpp.o CMakeFiles/out.dir/src/parserClass.cpp.o -o out  fmt/libfmt.a -lglfw 
+/usr/bin/c++    -rdynamic CMakeFiles/out.dir/src/glyphClass.cpp.o CMakeFiles/out.dir/src/main.cpp.o CMakeFiles/out.dir/src/parserClass.cpp.o  -o out  fmt/libfmt.a -lglfw 
