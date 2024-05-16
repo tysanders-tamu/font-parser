@@ -114,13 +114,8 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 int main() {
   //substantiate class
   string filename = "test.otf";
-  parserClass parser(filename);
-  parser.print_table_records();
-  cout << parser.tableDirectory.sfntVersion << endl;
-  cout << parser.tableDirectory.numTables << endl;
-  cout << parser.tableDirectory.searchRange << endl;
-  cout << parser.tableDirectory.entrySelector << endl;
-  cout << parser.tableDirectory.rangeShift << endl;
+  parserClass parser(filename, true);
+  // parser.print_table_records();
   
     // ifstream file("Helvetica.otf", ios::binary);
     // if (!file.is_open()) {
@@ -140,22 +135,7 @@ int main() {
     // //get record entry for cmap
     // TableRecord cmapRecord;
     // //find relevant entry
-    // for (const auto& record : records.records) {
-    //     if (record.tag == 0x636d6170) {
-    //         cmapRecord = record;
-    //         break;
-    //     }
-    // }
 
-    // cmapHeader cmapHeader = readCmapHeader(file, cmapRecord.offset);
-    // cout << "Cmap Header: " << cmapHeader.version << endl;
-    // cout << "Cmap Header: " << cmapHeader.numTables << endl;
-    // for (int i = 0; i < cmapHeader.numTables; i++) {
-    //     fmt::print("-------------------------\n");  
-    //     cout << "Platform ID: " << cmapHeader.encodingRecords[i].platformID << endl;
-    //     cout << "Encoding ID: " << cmapHeader.encodingRecords[i].encodingID << endl;
-    //     cout << "Offset: " << cmapHeader.encodingRecords[i].offset << endl;
-    // }
 
     // file.close();
 

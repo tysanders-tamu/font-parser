@@ -42,31 +42,58 @@ struct cmapHeader {
     vector<encodingRecord> encodingRecords;
 };
 
+struct CFFHeader {
+    uint8_t majorVersion;
+    uint8_t minorVersion;
+    uint8_t headerSize;
+    uint8_t offSize;
+};
+
+struct CFFIndex {
+    uint16_t count;
+    uint8_t offSize;
+    //offset size varies based on offSize, so assume largest
+    vector<uint32_t> offsets;
+    vector<uint8_t> data;
+};
+
 
 class parserClass
 {
   private:
-  public:
     bool is_open;
-    string filename;
+    bool debug = false;
     ifstream file;
-
+    string filename;
     //structs
     TableDirectory tableDirectory;
     TableRecords tableRecords;
+    //CFF specific
+    CFFHeader cffHeader;
+    CFFIndex nameIndex;
+    CFFIndex topDictIndex;
+    CFFIndex stringIndex;
+    CFFIndex globalSubrIndex;     
   public:
   // constructors
     parserClass(string file);
+    parserClass(string file, bool debug);
     ~parserClass();
   //
     void print_table_records();
     void hex_to_ascii(uint32_t hex);
-  //! private functions
-  private:
+    //! private functions
+    private:
     void read_table_directory();
     void read_table_records();
+    void standard_flow();
+    void read_CFF_header();
+    void read_CFF_indexes();
+    void populate_CFF_Index(CFFIndex& index);
     //direct file manipilation
+    uint8_t read_uint8_t();
     uint16_t read_uint16_t();
+    uint32_t read_uint24_t();
     uint32_t read_uint32_t();
 
   
