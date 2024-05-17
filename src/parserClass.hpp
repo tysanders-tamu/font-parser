@@ -82,6 +82,8 @@ class parserClass
   //
     void print_table_records();
     void hex_to_ascii(uint32_t hex);
+    void hex_to_ascii(uint8_t hex);
+    void print_hex_data(uint32_t offset, uint32_t length);
     //! private functions
     private:
     void read_table_directory();
@@ -92,6 +94,7 @@ class parserClass
     void populate_CFF_Index(CFFIndex& index);
     //direct file manipilation
     uint8_t read_uint8_t();
+    vector<uint8_t> read_index_data(uint32_t data_count);
     uint16_t read_uint16_t();
     uint32_t read_uint24_t();
     uint32_t read_uint32_t();

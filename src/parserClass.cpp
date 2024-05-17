@@ -20,10 +20,27 @@ void parserClass::standard_flow(){
   read_CFF_indexes();
 }
 
-
 parserClass::~parserClass()
 {
   if (is_open) file.close();
+}
+
+/*
+* Print hex data is non-destructive and it will not change the file position
+*/
+void parserClass::print_hex_data(uint32_t offset, uint32_t length) {
+  int _filepos = file.tellg();
+  file.seekg(0, ios_base::beg);
+  file.seekg(offset, ios_base::beg);
+
+  unsigned char c;
+  for (int i = 0; i < length; i++) {
+      file.read(reinterpret_cast<char*>(&c), sizeof(unsigned char));
+      printf("%c ", c);
+  }
+  cout << endl;
+
+  file.seekg(_filepos, ios_base::beg);
 }
 
 void parserClass::read_table_directory(){
@@ -86,7 +103,7 @@ void parserClass::populate_CFF_Index(CFFIndex& index){
   index.count   = read_uint16_t();
   //offsize can be 1, 2, 3, or 4 (num of bytes per offset)
   //? plus abs offset from header?
-  index.offSize = read_uint8_t() + cffHeader.offSize;
+  index.offSize = read_uint8_t();
 
   //get offset array
   for (int i = 0; i < index.count + 1; i++){
@@ -107,25 +124,26 @@ void parserClass::populate_CFF_Index(CFFIndex& index){
     }
   }
 
-  //print out offsets
-  if (debug){
-    fmt::print("Offsets: ");
-    for (const auto& offset : index.offsets){
-      fmt::print("{:#x} ", offset);
-    }
-    fmt::print("\n");
+  vector<uint8_t> single_read_data;
+  int start_post = (int)file.tellg() - 1;
+
+  //store data in index
+  for (int i = 0; i < index.count; i++){
+    file.seekg(start_post + index.offsets[i], ios_base::beg);
+    single_read_data = read_index_data(index.offsets[i + 1] - index.offsets[i]);
+    index.data.insert(index.data.end(), single_read_data.begin(), single_read_data.end());
   }
 
-  //test getting first element
- file.seekg(0);
- file.seekg(index.offsets[0]);
- int size = index.offsets[0] - index.offsets[1];
- fmt::print("Size: {}\n", size);
-//  file.read(reinterpret_cast<char*>(&value), sizeof(uint16_t));
-
-
-
-};
+  //TODO: add a way to track size of each element without having to query the offset arr
+  if (debug) {
+    fmt::print("-------index data:-------\n");
+    for (int i = 0; i < index.data.size(); i++){
+      //print out chunk together
+        fmt::print("{:#c}", index.data[i]);
+    }
+    fmt::print("\n-------------------------\n");
+  }
+}
 
 void parserClass::read_CFF_indexes(){
 
@@ -138,22 +156,12 @@ void parserClass::read_CFF_indexes(){
     }
   }
 
-  file.seekg(cffHeader.headerSize);
+  file.seekg(cffHeader.headerSize, ios_base::cur);
   //name, topDict, string, globalSubr
   populate_CFF_Index(nameIndex);
-  // populate_CFF_Index(topDictIndex);
-  // populate_CFF_Index(stringIndex);
-  // populate_CFF_Index(globalSubrIndex);
-
-  if(debug){
-    fmt::print("-------CFF Indexes-----------\n");
-    fmt::print("nameIndex.count: {}\n", nameIndex.count);
-      fmt::print("nameIndex.offSize: {}\n", nameIndex.offSize);
-
-    // fmt::print("topDictIndex.count: {}\n", topDictIndex.count);
-    // fmt::print("stringIndex.count: {}\n", stringIndex.count);
-    // fmt::print("globalSubrIndex.count: {}\n", globalSubrIndex.count);
-  }
+  populate_CFF_Index(topDictIndex);
+  populate_CFF_Index(stringIndex);
+  populate_CFF_Index(globalSubrIndex);
 }
 
 ////////////////////////////////////////////////////////////
@@ -173,7 +181,13 @@ void parserClass::print_table_records(){
 void parserClass::hex_to_ascii(uint32_t hex) {
     char str[11];
     sprintf(str, "%c%c%c%c", hex >> 24, hex >> 16, hex >> 8, hex);
-    fmt::print("Tag: {}\n", str);
+    fmt::print(str);
+}
+
+void parserClass::hex_to_ascii(uint8_t hex) {
+    char str[11];
+    sprintf(str, "%c%c", hex >> 8, hex);
+    fmt::print(str);
 }
 
 
@@ -181,6 +195,14 @@ uint8_t parserClass::read_uint8_t(){
   uint8_t value;
   file.read(reinterpret_cast<char*>(&value), sizeof(uint8_t));
   return value;
+}
+
+vector<uint8_t> parserClass::read_index_data(uint32_t data_count){
+  vector<uint8_t> data;
+  for (int i = 0; i < data_count; i++){
+    data.push_back(read_uint8_t());
+  }
+  return data;
 }
 
 uint16_t parserClass::read_uint16_t(){
