@@ -18,6 +18,12 @@ struct point{
   int y;
 };
 
+struct oper{
+  uint16_t op_val;
+  std::string name;
+  int numCount = 0;
+};
+
 
 const std::string one_byte_operators[] = {
   "",
@@ -105,8 +111,8 @@ class CharString{
   std::vector<hint> h_hints;
   std::vector<hint> v_hints;
   std::vector<bool> hintmasks;
-  std::queue<std::string> opers;
-  std::queue<int32_t> nums;
+  std::vector<oper> opers;
+  std::vector<int32_t> nums;
   int defaultWidthX;
   int x_pos;
   int y_pos;  
@@ -116,6 +122,7 @@ class CharString{
   int32_t getNextNum();
   void getValsQueue(const std::vector<uint8_t> &vals);
   void parseVals();
+  void updateArrs();
 };
 
 #endif

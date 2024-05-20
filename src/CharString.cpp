@@ -54,25 +54,51 @@ void CharString::getValsQueue(const std::vector<uint8_t> &vals){
 }
 
 void CharString::parseVals(){
+  int num_count = 0;
   while (!values.empty()){
-    uint16_t val = 0x0000 | values.front();
+    uint16_t val = values.front();
     if (val == 12){
       values.pop();
       val = values.front();
+      uint16_t op_num = 12<<2 | val;
+      oper op = {op_num,two_byte_operators[val],num_count};
       values.pop();
-      std::string op = two_byte_operators[val];
-      if(op != ""){
-        opers.push(op);
+      num_count = 0;
+      if(op.name != ""){
+        opers.push_back(op);
       } else {
         throw("Reserved Operator");
       }
     } 
     else if (val < 32 && val != 28){
-      opers.push(one_byte_operators[val]);
+      oper op = {(uint16_t)(val),one_byte_operators[val],num_count};
+      opers.push_back(op);
       values.pop();
+      num_count = 0;
     } 
     else {
-      nums.push(getNextNum());
+      nums.push_back(getNextNum());
+      num_count++;
+    }
+  }
+}
+
+void CharString::updateArrs(){
+  if (opers.empty() || nums.empty()){
+    throw("Empty Queues");
+  }
+  int currNum = 0;
+  for (int oper_loc = 0; oper_loc < opers.size(); ++oper_loc){
+    oper current_op = opers[oper_loc];
+    if (current_op.name == ""){
+      throw("Empty Operator");
+    }
+
+    switch(current_op.op_val){
+      case 1: // hstem
+        if ()
+      default:
+        throw("Invalid Operator or Reserved Operator");
     }
   }
 }
