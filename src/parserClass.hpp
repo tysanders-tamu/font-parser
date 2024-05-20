@@ -4,6 +4,7 @@
 #include <iostream>
 #include <arpa/inet.h>
 #include <fmt/core.h>
+#include <fmt/color.h>
 using namespace std;
 
 // Define a struct to represent the table directory
@@ -57,9 +58,13 @@ struct CFFIndex {
     vector<uint8_t> data;
 };
 
+//CFF 1-byte operators
+
+
 
 class parserClass
 {
+  //objects
   private:
     bool is_open;
     bool debug = false;
@@ -73,7 +78,9 @@ class parserClass
     CFFIndex nameIndex;
     CFFIndex topDictIndex;
     CFFIndex stringIndex;
-    CFFIndex globalSubrIndex;     
+    CFFIndex globalSubrIndex;    
+
+  //methods
   public:
   // constructors
     parserClass(string file);
@@ -98,6 +105,6 @@ class parserClass
     uint16_t read_uint16_t();
     uint32_t read_uint24_t();
     uint32_t read_uint32_t();
+    void decode_dict_data(vector<uint8_t> data);
 
-  
 };

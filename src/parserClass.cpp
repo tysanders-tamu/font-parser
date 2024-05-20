@@ -99,11 +99,29 @@ void parserClass::read_CFF_header(){
   
 }
 
+
+//Dict data
+void parserClass::decode_dict_data(vector<uint8_t> data){
+  //lets take a look at the data first
+  if (debug){
+    for (int i = 0; i < data.size(); i++){
+      //print out chunk together
+        fmt::print(" {:d} ", data[i]);
+    }
+    fmt::print("\n-------------------------\n");
+  }
+}
+
 void parserClass::populate_CFF_Index(CFFIndex& index){
   index.count   = read_uint16_t();
   //offsize can be 1, 2, 3, or 4 (num of bytes per offset)
   //? plus abs offset from header?
   index.offSize = read_uint8_t();
+
+  if (debug){
+    fmt::print("count: {}\n", index.count);
+    fmt::print("offSize: {}\n", index.offSize);
+  }
 
   //get offset array
   for (int i = 0; i < index.count + 1; i++){
@@ -156,12 +174,33 @@ void parserClass::read_CFF_indexes(){
     }
   }
 
+///////////////////// end of cff specific //////////////////////
+
   file.seekg(cffHeader.headerSize, ios_base::cur);
+  int bottom_of_cff_header_abs = file.tellg();
   //name, topDict, string, globalSubr
+  fmt::print(fg(fmt::color::green), "=============nameIndex============\n");
   populate_CFF_Index(nameIndex);
+  // fmt::print("file location: " + to_string(file.tellg()) + "\n");
+  fmt::print(fg(fmt::color::green), "===========topDictIndex===========\n");
   populate_CFF_Index(topDictIndex);
+    fmt::print("nameIndex.count: {}\n", nameIndex.count);
+
+  if (debug){
+    for (int i = 0; i < nameIndex.count + 1; i++){
+      fmt::print("dict.offsets[{}]: {:#x}\n", i, topDictIndex.offsets[i]);
+    }
+  }
+
+  fmt::print(fg(fmt::color::green), "============stringIndex===========\n");
   populate_CFF_Index(stringIndex);
-  populate_CFF_Index(globalSubrIndex);
+  //! curr causing segfault
+  // fmt::print(fg(fmt::color::green),"==========globalSubrIndex==========\n");
+  // populate_CFF_Index(globalSubrIndex);
+
+  //decode dict data
+  fmt::print(fg(fmt::color::green), "=============dict data============\n");
+  decode_dict_data(topDictIndex.data);
 }
 
 ////////////////////////////////////////////////////////////
