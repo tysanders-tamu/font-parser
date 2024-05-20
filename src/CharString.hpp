@@ -10,7 +10,7 @@
 struct hint{
   int x;
   int y;
-  bool isV;
+  //bool isV;
 };
 
 struct point{

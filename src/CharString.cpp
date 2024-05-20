@@ -1,14 +1,14 @@
 #include "CharString.hpp"
 
 void CharString::addPoint(int x, int y){
-  points.push_back(std::make_pair(x,y));
+  points.push_back({x,y});
 }
 
 void CharString::addHint(int x, int y, bool isV){
   if(isV){
-    v_hints.push_back(std::make_pair(x,y));
+    v_hints.push_back({x,y});
   }else{
-    h_hints.push_back(std::make_pair(x,y));
+    h_hints.push_back({x,y});
   }
 }
 
