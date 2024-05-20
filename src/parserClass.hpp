@@ -1,5 +1,6 @@
 #include <string>
 #include <vector>
+#include <queue>
 #include <fstream>
 #include <iostream>
 #include <arpa/inet.h>
@@ -58,8 +59,90 @@ struct CFFIndex {
     vector<uint8_t> data;
 };
 
-//CFF 1-byte operators
+// CFF 1-byte operators
+const string cff_operators_onebyte[31] = {
+  "version",
+  "Notice",
+  "FullName",
+  "FamilyName",
+  "Weight",
+  "FontBBox",
+  "BlueValues",
+  "OtherBlues",
+  "FamilyBlues",
+  "FamilyOtherBlues",
+  // 10
+  "StdHW",
+  "StdVW",
+  "escape", // first byte of a two byte operator
+  "UniqueID",
+  "XUID",
+  "charset",
+  "Encoding",
+  "CharStrings",
+  "Private",
+  "Subrs",
+  // 20
+  "defaultWidthX",
+  "nominalWidthX",
+  "", // reserved
+  "", // reserved
+  "", // reserved
+  "", // reserved
+  "", // reserved
+  "", // reserved
+  "", // shortint
+  "", // longint
+  // 30
+  "BCD"
+};
 
+//CFF 2-byte operators (all start with 12, so we drop it)
+const string cff_operators_twobyte[39] = {
+  // 0
+  "Copyright",
+  "isFixedPitch",
+  "ItalicAngle",
+  "UnderlinePosition",
+  "UnderlineThickness",
+  "PaintType",
+  "CharstringType",
+  "FontMatrix",
+  "StrokeWidth",
+  "BlueScale",
+  // 10
+  "BlueShift",
+  "BlueFuzz",
+  "StemSnapH",
+  "StemSnapV",
+  "ForceBold",
+  "", // reserved
+  "", // reserved
+  "LanguageGroup",
+  "ExpansionFactor",
+  "initialRandomSeed",
+  // 20
+  "SyntheticBase",
+  "PostScript",
+  "BaseFontName",
+  "BaseFontBlend",
+  "", // reserved
+  "", // reserved
+  "", // reserved
+  "", // reserved
+  "", // reserved
+  "", // reserved
+  // 30
+  "ROS",
+  "CIDFontVersion",
+  "CIDFontRevision",
+  "CIDFontType",
+  "CIDCount",
+  "UIDBase",
+  "FDArray",
+  "FDSelect",
+  "FontName"
+};
 
 
 class parserClass

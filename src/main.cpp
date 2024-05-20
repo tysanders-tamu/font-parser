@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+
 #include <fmt/core.h>
 #include <arpa/inet.h>
 #include <inttypes.h>
@@ -11,8 +12,10 @@ using namespace std;
 
 int main() {
   //substantiate class
-  string filename = "test.otf";
+  string filename = "test2.otf";
   parserClass parser(filename, true);
+
+  cout << "\n";
   // parser.print_table_records();
   
     // ifstream file("Helvetica.otf", ios::binary);

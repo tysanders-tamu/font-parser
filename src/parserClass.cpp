@@ -36,7 +36,7 @@ void parserClass::print_hex_data(uint32_t offset, uint32_t length) {
   unsigned char c;
   for (int i = 0; i < length; i++) {
       file.read(reinterpret_cast<char*>(&c), sizeof(unsigned char));
-      printf("%c ", c);
+      fmt::print("{:x} ", c);
   }
   cout << endl;
 
@@ -99,17 +99,116 @@ void parserClass::read_CFF_header(){
   
 }
 
+//helper to decode_dict_data
+int opsize_to_opamt(uint8_t opsize){
+  if (opsize >= 32 && opsize <= 246){return 1;}
+  if (opsize >= 247 && opsize <= 254){return 2;}
+  if (opsize == 28){return 3;}
+  if (opsize == 29){return 5;}
+  //if not a valid first num
+  return 0;
+}
+
+int decode_operand(int b0){
+  return (b0-139);
+}
+
+int decode_operand(int b0, int b1){
+  if (b0 >= 247 && b0 <= 250){
+    return ((b0-247)*256 + b1 + 108);
+  }
+
+  if (b0 >= 251 && b0 <= 254){
+    return (-(b0-247)*256 - b1 - 108);
+  }
+}
+
+//b0 == 28
+int decode_operand(int b0, int b1, int b2){
+  return (b1 << 8|b2);
+}
+
+//b1 == 29
+int decode_operand(int b0, int b1, int b2, int b3, int b4){
+  return (b1 << 24|b2 << 16|b3 << 8|b4);
+}
 
 //Dict data
 void parserClass::decode_dict_data(vector<uint8_t> data){
-  //lets take a look at the data first
-  if (debug){
-    for (int i = 0; i < data.size(); i++){
-      //print out chunk together
-        fmt::print(" {:d} ", data[i]);
+  vector<pair<int, vector<int>>> data_grouping;
+  vector<int> _unit_calculated_values;
+
+  int i = 0;
+  while(1){
+    //read first value in array, get size, read that much
+    switch (opsize_to_opamt(data[i]))
+    {
+      case 1:
+        _unit_calculated_values.push_back(decode_operand(data[i]));
+        i += 1;
+        break;
+      case 2:
+        _unit_calculated_values.push_back(decode_operand(data[i], data[i+1]));
+        i += 2;
+        break;
+      case 3:
+        _unit_calculated_values.push_back(decode_operand(data[i], data[i+1], data[i+2]));
+        i += 3;
+        break;
+      case 5:
+        _unit_calculated_values.push_back(decode_operand(data[i], data[i+1], data[i+2], data[i+3], data[i+4]));
+        i += 5;
+        break;
     }
-    fmt::print("\n-------------------------\n");
+
+    //after reading data, check for operators, if none, read another chunk
+    if (data[i] > 31 || data[i] == 28 || data[i] == 29) continue;
+
+    pair<int, vector<int>> _unit_instruction;
+
+    //use two byte operator?
+    if (data[i] == 12){
+      i++;
+      //construct pair
+      _unit_instruction.first = data[i] + 256;
+    }
+
+    //if not a two byte
+    _unit_instruction.first = data[i];
+
+    //for both
+    _unit_instruction.second = _unit_calculated_values;
+
+    //push the pair into data_grouping vector
+    data_grouping.push_back(_unit_instruction);
+    i++;
+
+    //empty out operand vector
+    _unit_calculated_values = {};
+
+    //simple break instruction
+    if (i >= data.size()){
+      break;
+    }
   }
+
+  //debug print outof data_grouping
+  if (debug){
+    fmt::print("-------data grouping of dict:-------\n");
+    for (auto group : data_grouping){
+      //pre process
+      if (group.first >= 256){
+        fmt::print(fg(fmt::color::orange), "{} ", cff_operators_twobyte[group.first - 256]);
+      } else {
+        fmt::print(fg(fmt::color::orange), "{} ", cff_operators_onebyte[group.first]);
+      }
+      for (auto value : group.second){
+        fmt::print(fg(fmt::color::azure), "{} ", value);
+      }
+    }
+    fmt::print("\n------------------------------------\n");
+  }
+
 }
 
 void parserClass::populate_CFF_Index(CFFIndex& index){
@@ -195,8 +294,8 @@ void parserClass::read_CFF_indexes(){
   fmt::print(fg(fmt::color::green), "============stringIndex===========\n");
   populate_CFF_Index(stringIndex);
   //! curr causing segfault
-  // fmt::print(fg(fmt::color::green),"==========globalSubrIndex==========\n");
-  // populate_CFF_Index(globalSubrIndex);
+  fmt::print(fg(fmt::color::green),"==========globalSubrIndex==========\n");
+  populate_CFF_Index(globalSubrIndex);
 
   //decode dict data
   fmt::print(fg(fmt::color::green), "=============dict data============\n");
