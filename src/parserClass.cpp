@@ -272,6 +272,11 @@ void parserClass::populate_CFF_Index(CFFIndex& index){
   //TODO: add a way to track size of each element without having to query the offset arr
   if (debug) {
     fmt::print("-------index data:-------\n");
+    if (index.offsets.size() > 0){
+      for (int i = 0; i < min(index.count + 1,4); i++){
+        fmt::print("offset[{}]: {:#x}\n", i, index.offsets[i]);
+      }
+    }
     for (int i = 0; i < index.data.size(); i++){
       //print out chunk together
         fmt::print("{:#c}", index.data[i]);
@@ -305,7 +310,7 @@ void parserClass::read_CFF_indexes(){
     fmt::print("nameIndex.count: {}\n", nameIndex.count);
 
   if (debug){
-    for (int i = 0; i < nameIndex.count + 1; i++){
+    for (int i = 0; i < topDictIndex.count + 1; i++){
       fmt::print("dict.offsets[{}]: {:#x}\n", i, topDictIndex.offsets[i]);
     }
   }
@@ -371,12 +376,8 @@ uint16_t parserClass::read_uint16_t(){
 //TODO: TEST
 uint32_t parserClass::read_uint24_t(){
   uint32_t value;
-  uint8_t byte1 = read_uint8_t();
-  uint8_t byte2 = read_uint8_t();
-  uint8_t byte3 = read_uint8_t();
-  value = (byte3 << 16) | (byte2 << 8) | byte1;
-  //file.read(reinterpret_cast<char*>(&value), 3);
-  return htonl(value);
+  file.read(reinterpret_cast<char*>(&value), 3);
+  return htonl(value)>>8;
 }
 
 uint32_t parserClass::read_uint32_t(){
