@@ -188,11 +188,14 @@ void parserClass::decode_dict_data(vector<uint8_t> data){
     if (data[i] == 12){
       i++;
       //construct pair
-      _unit_instruction.first = data[i] + 256;
+      _unit_instruction.first = data[i] + 256;//offset for 2-byte operators
+    } else{
+      //if not a two byte
+      _unit_instruction.first = data[i];
     }
 
-    //if not a two byte
-    _unit_instruction.first = data[i];
+
+    //for both
     _unit_instruction.second = _unit_calculated_values;
 
     //push the pair into decoded_dict_data vector
