@@ -141,7 +141,7 @@ int decode_operand(int b0, int b1){
   }
 
   if (b0 >= 251 && b0 <= 254){
-    return (-(b0-247)*256 - b1 - 108);
+    return (-(b0-251)*256 - b1 - 108);
   }
 }
 
@@ -371,7 +371,11 @@ uint16_t parserClass::read_uint16_t(){
 //TODO: TEST
 uint32_t parserClass::read_uint24_t(){
   uint32_t value;
-  file.read(reinterpret_cast<char*>(&value), 3);
+  uint8_t byte1 = read_uint8_t();
+  uint8_t byte2 = read_uint8_t();
+  uint8_t byte3 = read_uint8_t();
+  value = (byte3 << 16) | (byte2 << 8) | byte1;
+  //file.read(reinterpret_cast<char*>(&value), 3);
   return htonl(value);
 }
 
