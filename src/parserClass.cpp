@@ -18,6 +18,27 @@ void parserClass::standard_flow(){
   read_table_records();
   read_CFF_header();
   read_CFF_indexes();
+    //operate on indexs
+  decode_dict_data(topDictIndex.data);
+
+  //skip down to charstrings
+  //find charstring offset in decode_dict_data
+  int charstring_offset = 0;
+  for (auto group : decoded_dict_data){
+    if (group.first == 17){
+      charstring_offset = group.second[0];
+      break;
+    }
+  }
+  
+  file.seekg(charstring_offset, ios::ios_base::beg);
+
+  //read charstring data
+  fmt::print(fg(fmt::color::green), "==========charStringIndex==========\n");
+  populate_CFF_Index(charStringIndex);
+
+
+
 }
 
 parserClass::~parserClass()
@@ -135,7 +156,6 @@ int decode_operand(int b0, int b1, int b2, int b3, int b4){
 
 //Dict data
 void parserClass::decode_dict_data(vector<uint8_t> data){
-  vector<pair<int, vector<int>>> data_grouping;
   vector<int> _unit_calculated_values;
 
   int i = 0;
@@ -163,9 +183,7 @@ void parserClass::decode_dict_data(vector<uint8_t> data){
 
     //after reading data, check for operators, if none, read another chunk
     if (data[i] > 31 || data[i] == 28 || data[i] == 29) continue;
-
     pair<int, vector<int>> _unit_instruction;
-
     //use two byte operator?
     if (data[i] == 12){
       i++;
@@ -175,27 +193,23 @@ void parserClass::decode_dict_data(vector<uint8_t> data){
 
     //if not a two byte
     _unit_instruction.first = data[i];
-
-    //for both
     _unit_instruction.second = _unit_calculated_values;
 
-    //push the pair into data_grouping vector
-    data_grouping.push_back(_unit_instruction);
+    //push the pair into decoded_dict_data vector
+    decoded_dict_data.push_back(_unit_instruction);
     i++;
-
     //empty out operand vector
     _unit_calculated_values = {};
-
     //simple break instruction
     if (i >= data.size()){
       break;
     }
   }
 
-  //debug print outof data_grouping
+  //debug print outof decoded_dict_data
   if (debug){
     fmt::print("-------data grouping of dict:-------\n");
-    for (auto group : data_grouping){
+    for (auto group : decoded_dict_data){
       //pre process
       if (group.first >= 256){
         fmt::print(fg(fmt::color::orange), "{} ", cff_operators_twobyte[group.first - 256]);
@@ -299,7 +313,6 @@ void parserClass::read_CFF_indexes(){
 
   //decode dict data
   fmt::print(fg(fmt::color::green), "=============dict data============\n");
-  decode_dict_data(topDictIndex.data);
 }
 
 ////////////////////////////////////////////////////////////

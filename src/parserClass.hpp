@@ -59,6 +59,33 @@ struct CFFIndex {
     vector<uint8_t> data;
 };
 
+//exact sizing is irrelevant as we are not using the struct to read
+struct TopDict {
+  string version;
+  string Notice;
+  string Copyright;
+  string FullName;
+  string FamilyName;
+  string Weight;
+  bool isFixedPitch = 0;
+  int ItalicAngle = 0;
+  int UnderlinePosition = -100;
+  int UnderlineThickness = 50;
+  int PaintType = 0;
+  int CharstringType = 2;
+  vector<double> FontMatrix = {0.001, 0, 0, 0.001, 0, 0};
+  int uniqueID;
+  vector<int> XUID;
+  int charset = 0; //offset
+  int Encoding = 0; //offset
+  int CharString; //offset to charstrings
+  int Private[2] = {0, 0}; //private dict size and offset
+  int SyntheticBase;
+  string PostScript;
+  string BaseFontName;
+  string BaseFontBlend; 
+};
+
 // CFF 1-byte operators
 const string cff_operators_onebyte[31] = {
   "version",
@@ -161,7 +188,11 @@ class parserClass
     CFFIndex nameIndex;
     CFFIndex topDictIndex;
     CFFIndex stringIndex;
-    CFFIndex globalSubrIndex;    
+    CFFIndex globalSubrIndex;
+    CFFIndex charStringIndex;    
+    //Dict objects
+    vector<pair<int, vector<int>>> decoded_dict_data;
+    TopDict top_dict;
 
   //methods
   public:

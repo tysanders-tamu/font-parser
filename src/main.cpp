@@ -12,7 +12,7 @@ using namespace std;
 
 int main() {
   //substantiate class
-  string filename = "test2.otf";
+  string filename = "test.otf";
   parserClass parser(filename, true);
 
   cout << "\n";
