@@ -53,18 +53,23 @@ void CharString::getValsQueue(const std::vector<uint8_t> &vals){
   }
 }
 
+// Parse the values in the values queue and populate the opers and nums vectors
 void CharString::parseVals(){
   int num_count = 0;
   bool getWidth = true;
+
   while (!values.empty()){
     uint16_t val = values.front();
+
     if (val == 12){
+      // Handle two-byte operators
       values.pop();
       val = values.front();
       uint16_t op_num = 12<<8 | val;
       oper op = {op_num,two_byte_operators[val],num_count};
       values.pop();
       num_count = 0;
+
       if(op.name != ""){
         opers.push_back(op);
       } else {
@@ -72,6 +77,7 @@ void CharString::parseVals(){
       }
     } 
     else if (val < 32 && val != 28){
+      // Handle one-byte operators
       if (getWidth && (num_count%2 == 1)){
         width = nominalWidthX + nums[0];
         getWidth = false;

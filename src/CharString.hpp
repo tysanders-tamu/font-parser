@@ -25,6 +25,7 @@ struct oper{
 };
 
 
+//reserved operators left blank
 const std::string one_byte_operators[] = {
   "",
   "hstem",
@@ -59,7 +60,7 @@ const std::string one_byte_operators[] = {
   "vhcurveto",
   "hvcurveto"
 };
-
+//reserved operators left blank
 const std::string two_byte_operators[] = {
   "",
   "",
@@ -103,7 +104,7 @@ const std::string two_byte_operators[] = {
 };
 
 class CharString{
-  CharString():x_pos(0),y_pos(0), defaultWidthX(256), nominalWidth(256), width(256) {};
+  CharString():x_pos(0),y_pos(0), defaultWidthX(256), nominalWidthX(256), width(256) {};
   ~CharString(){};
 
   std::queue<uint8_t> values;
@@ -115,7 +116,7 @@ class CharString{
   std::vector<int32_t> nums;
   uint width;
   uint defaultWidthX;
-  uint nominalWidth;
+  uint nominalWidthX;
   int x_pos;
   int y_pos;  
 
@@ -124,7 +125,7 @@ class CharString{
   int32_t getNextNum();
   void getValsQueue(const std::vector<uint8_t> &vals);
   void parseVals();
-  void updateArrs();
+  void updateValues();
 };
 
 #endif
