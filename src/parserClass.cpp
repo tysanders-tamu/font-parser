@@ -16,6 +16,7 @@ void parserClass::standard_flow(){
 
   read_table_directory();
   read_table_records();
+  int start_of_cff = file.tellg();
   read_CFF_header();
   read_CFF_indexes();
     //operate on indexs
@@ -31,7 +32,7 @@ void parserClass::standard_flow(){
     }
   }
   
-  file.seekg(charstring_offset, ios::ios_base::beg);
+  file.seekg(charstring_offset + start_of_cff, ios::ios_base::beg);
 
   //read charstring data
   fmt::print(fg(fmt::color::green), "==========charStringIndex==========\n");
@@ -57,7 +58,7 @@ void parserClass::print_hex_data(uint32_t offset, uint32_t length) {
   unsigned char c;
   for (int i = 0; i < length; i++) {
       file.read(reinterpret_cast<char*>(&c), sizeof(unsigned char));
-      fmt::print("{:x} ", c);
+      fmt::print("{:c} ", c);
   }
   cout << endl;
 
@@ -299,6 +300,7 @@ void parserClass::read_CFF_indexes(){
   populate_CFF_Index(nameIndex);
   // fmt::print("file location: " + to_string(file.tellg()) + "\n");
   fmt::print(fg(fmt::color::green), "===========topDictIndex===========\n");
+  fmt::print("top of dict offset in file {}\n", (int)file.tellg());
   populate_CFF_Index(topDictIndex);
     fmt::print("nameIndex.count: {}\n", nameIndex.count);
 
@@ -307,6 +309,7 @@ void parserClass::read_CFF_indexes(){
       fmt::print("dict.offsets[{}]: {:#x}\n", i, topDictIndex.offsets[i]);
     }
   }
+
 
   fmt::print(fg(fmt::color::green), "============stringIndex===========\n");
   populate_CFF_Index(stringIndex);
