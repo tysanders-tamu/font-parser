@@ -10,7 +10,7 @@
 struct hint{
   int x;
   int y;
-  //bool isV;
+  //bool active = true;
 };
 
 struct point{
@@ -21,7 +21,7 @@ struct point{
 struct oper{
   uint16_t op_val;
   std::string name;
-  int numCount = 0;
+  int numCount;
 };
 
 
@@ -103,7 +103,7 @@ const std::string two_byte_operators[] = {
 };
 
 class CharString{
-  CharString():x_pos(0),y_pos(0), defaultWidthX(256) {};
+  CharString():x_pos(0),y_pos(0), defaultWidthX(256), nominalWidth(256), width(256) {};
   ~CharString(){};
 
   std::queue<uint8_t> values;
@@ -113,7 +113,9 @@ class CharString{
   std::vector<bool> hintmasks;
   std::vector<oper> opers;
   std::vector<int32_t> nums;
-  int defaultWidthX;
+  uint width;
+  uint defaultWidthX;
+  uint nominalWidth;
   int x_pos;
   int y_pos;  
 

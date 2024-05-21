@@ -55,12 +55,13 @@ void CharString::getValsQueue(const std::vector<uint8_t> &vals){
 
 void CharString::parseVals(){
   int num_count = 0;
+  bool getWidth = true;
   while (!values.empty()){
     uint16_t val = values.front();
     if (val == 12){
       values.pop();
       val = values.front();
-      uint16_t op_num = 12<<2 | val;
+      uint16_t op_num = 12<<8 | val;
       oper op = {op_num,two_byte_operators[val],num_count};
       values.pop();
       num_count = 0;
@@ -71,6 +72,10 @@ void CharString::parseVals(){
       }
     } 
     else if (val < 32 && val != 28){
+      if (getWidth && (num_count%2 == 1)){
+        width = nominalWidthX + nums[0];
+        getWidth = false;
+      }
       oper op = {(uint16_t)(val),one_byte_operators[val],num_count};
       opers.push_back(op);
       values.pop();
@@ -83,7 +88,7 @@ void CharString::parseVals(){
   }
 }
 
-void CharString::updateArrs(){
+void CharString::updateValues(){
   if (opers.empty() || nums.empty()){
     throw("Empty Queues");
   }
@@ -96,7 +101,24 @@ void CharString::updateArrs(){
 
     switch(current_op.op_val){
       case 1: // hstem
-        if ()
+        if (current_op.numCount%2 == 1){
+          width = nominalWidthX + nums[currNum];
+          currNum++;
+          current_op.numCount--;
+        } else {
+          width = defaultWidthX;
+        }
+        for (int i = 0; i < current_op.numCount; i+=2){
+          addHint(nums[currNum],nums[currNum+1],false);
+          currNum+=2;
+        }
+        break;
+      case 3: // vstem
+        for (int i = 0; i < current_op.numCount; i+=2){
+          addHint(nums[currNum],nums[currNum+1],true);
+          currNum+=2;
+        }
+        break;
       default:
         throw("Invalid Operator or Reserved Operator");
     }
