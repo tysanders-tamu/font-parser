@@ -16,7 +16,6 @@ void parserClass::standard_flow(){
 
   read_table_directory();
   read_table_records();
-  int start_of_cff = file.tellg();
   read_CFF_header();
   read_CFF_indexes();
     //operate on indexs
@@ -25,20 +24,30 @@ void parserClass::standard_flow(){
   //skip down to charstrings
   //find charstring offset in decode_dict_data
   int charstring_offset = 0;
+
+  file.seekg(0);
+  for (auto record : tableRecords.records){
+    if (record.tag == 0x43464620){
+      charstring_offset += record.offset;
+      break;
+    }
+  }
+  file.seekg(charstring_offset, ios::ios_base::beg);//correct offset to start of cff
+
+
   for (auto group : decoded_dict_data){
     if (group.first == 17){
-      charstring_offset = group.second[0];
+      charstring_offset += group.second[0];
       break;
     }
   }
   
-  file.seekg(charstring_offset + start_of_cff, ios::ios_base::beg);
+
+  file.seekg(charstring_offset, ios::ios_base::beg);
 
   //read charstring data
   fmt::print(fg(fmt::color::green), "==========charStringIndex==========\n");
-  populate_CFF_Index(charStringIndex);
-
-
+  // populate_CFF_Index(charStringIndex);
 
 }
 
@@ -132,26 +141,30 @@ int opsize_to_opamt(uint8_t opsize){
 }
 
 int decode_operand(int b0){
+  fmt::print(fg(fmt::color::sea_green), "[{:x}]", b0);
   return (b0-139);
 }
 
 int decode_operand(int b0, int b1){
+  fmt::print(fg(fmt::color::sea_green), "[{:x} {:x}]", b0, b1);
   if (b0 >= 247 && b0 <= 250){
     return ((b0-247)*256 + b1 + 108);
   }
 
   if (b0 >= 251 && b0 <= 254){
-    return (-(b0-247)*256 - b1 - 108);
+    return (-256*(b0-251) - b1 -108);
   }
 }
 
 //b0 == 28
 int decode_operand(int b0, int b1, int b2){
+  fmt::print(fg(fmt::color::sea_green), "[{:x} {:x} {:x}]", b0, b1, b2);
   return (b1 << 8|b2);
 }
 
 //b1 == 29
 int decode_operand(int b0, int b1, int b2, int b3, int b4){
+  fmt::print(fg(fmt::color::sea_green), "[{:x} {:x} {:x} {:x} {:x}]", b0, b1, b2, b3, b4);
   return (b1 << 24|b2 << 16|b3 << 8|b4);
 }
 
