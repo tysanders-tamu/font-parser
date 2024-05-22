@@ -32,8 +32,6 @@ void parserClass::standard_flow(){
       break;
     }
   }
-  file.seekg(charstring_offset, ios::ios_base::beg);//correct offset to start of cff
-
 
   for (auto group : decoded_dict_data){
     if (group.first == 17){
@@ -47,7 +45,7 @@ void parserClass::standard_flow(){
 
   //read charstring data
   fmt::print(fg(fmt::color::green), "==========charStringIndex==========\n");
-  // populate_CFF_Index(charStringIndex);
+  populate_CFF_Index(charStringIndex, true);
 
 }
 
@@ -146,12 +144,15 @@ int decode_operand(int b0){
 }
 
 int decode_operand(int b0, int b1){
-  fmt::print(fg(fmt::color::sea_green), "[{:x} {:x}]", b0, b1);
   if (b0 >= 247 && b0 <= 250){
+    fmt::print(fg(fmt::color::sea_green), "[{:x} {:x}", b0, b1);
+    fmt::print(fg(fmt::color::red), ":{:d}] ", ((b0-247)*256 + b1 + 108));
     return ((b0-247)*256 + b1 + 108);
   }
 
   if (b0 >= 251 && b0 <= 254){
+    fmt::print(fg(fmt::color::sea_green), "[{:x} {:x}", b0, b1);
+    fmt::print(fg(fmt::color::red), " :{:d}] ", (-256*(b0-251) - b1 -108));
     return (-256*(b0-251) - b1 -108);
   }
 }
@@ -242,9 +243,13 @@ void parserClass::decode_dict_data(vector<uint8_t> data){
 
 }
 
-void parserClass::populate_CFF_Index(CFFIndex& index){
+void parserClass::populate_CFF_Index(CFFIndex& index, bool do_hex = false){
   index.count   = read_uint16_t();
   //offsize can be 1, 2, 3, or 4 (num of bytes per offset)
+  if (index.count == 0){
+    return;
+  }
+
   //? plus abs offset from header?
   index.offSize = read_uint8_t();
 
@@ -286,13 +291,21 @@ void parserClass::populate_CFF_Index(CFFIndex& index){
   if (debug) {
     fmt::print("-------index data:-------\n");
     if (index.offsets.size() > 0){
-      for (int i = 0; i < min(index.count + 1,4); i++){
+      for (int i = 0; i < min(index.count + 1, 4); i++){
         fmt::print("offset[{}]: {:#x}\n", i, index.offsets[i]);
       }
+      if (index.count > 4){
+        fmt::print("...\n");
+      }
     }
-    for (int i = 0; i < index.data.size(); i++){
-      //print out chunk together
-        fmt::print("{:#c}", index.data[i]);
+    //better data representation
+    for (int i = 0; i < index.offsets.size()-1; i++){
+      fmt::print(fg(fmt::color::orange), "[");
+      // fmt::print("{}", (index.offsets[i+1] - index.offsets[i]));
+      for (int j = 0; j < (index.offsets[i + 1] - index.offsets[i]); j++){
+        fmt::print("{:d} ", index.data[i + j]);
+      }
+      fmt::print(fg(fmt::color::orange), "]");
     }
     fmt::print("\n-------------------------\n");
   }
@@ -390,7 +403,7 @@ uint16_t parserClass::read_uint16_t(){
 uint32_t parserClass::read_uint24_t(){
   uint32_t value;
   file.read(reinterpret_cast<char*>(&value), 3);
-  return htonl(value)>>8;
+  return htonl(value) >> 8;
 }
 
 uint32_t parserClass::read_uint32_t(){

@@ -6,6 +6,7 @@
 #include <arpa/inet.h>
 #include <fmt/core.h>
 #include <fmt/color.h>
+#include <bitset>
 using namespace std;
 
 // Define a struct to represent the table directory
@@ -212,7 +213,7 @@ class parserClass
     void standard_flow();
     void read_CFF_header();
     void read_CFF_indexes();
-    void populate_CFF_Index(CFFIndex& index);
+    void populate_CFF_Index(CFFIndex& index, bool do_hex);
     //direct file manipilation
     uint8_t read_uint8_t();
     vector<uint8_t> read_index_data(uint32_t data_count);
