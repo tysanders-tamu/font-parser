@@ -299,13 +299,25 @@ void parserClass::populate_CFF_Index(CFFIndex& index, bool do_hex = false){
       }
     }
     //better data representation
+    int data_offset = 0;
     for (int i = 0; i < index.offsets.size()-1; i++){
+      int data_size = index.offsets[i+1] - index.offsets[i];
+      int j = 0;
       fmt::print(fg(fmt::color::orange), "[");
-      // fmt::print("{}", (index.offsets[i+1] - index.offsets[i]));
-      for (int j = 0; j < (index.offsets[i + 1] - index.offsets[i]); j++){
-        fmt::print("{:d} ", index.data[i + j]);
+      while (j<data_size){
+        fmt::print("{:d} ", index.data[data_offset + j]);
+        j++;
+        //fmt::print("\n");
       }
+      data_offset += data_size;
       fmt::print(fg(fmt::color::orange), "]");
+      
+    //   fmt::print(fg(fmt::color::orange), "[");
+    //   // fmt::print("{}", (index.offsets[i+1] - index.offsets[i]));
+    //   for (int j = 0; j < (index.offsets[i + 1] - index.offsets[i]); j++){
+    //     fmt::print("{:d} ", index.data[i + j]);
+    //   }
+    //   fmt::print(fg(fmt::color::orange), "]");
     }
     fmt::print("\n-------------------------\n");
   }
