@@ -126,6 +126,31 @@ class CharString{
   void getValsQueue(const std::vector<uint8_t> &vals);
   void parseVals();
   void updateValues();
+
+  void rmoveto(const int &currNum);
+  void hmoveto();
+  void vmoveto();
+  void rlineto();
+  void hlineto();
+  void vlineto();
+  void rrcurveto();
+  void hhcurveto();
+  void hvcurveto();
+  void rcurveline();
+  void rlinecurve();
+  void vhcurveto();
+  void vvcurveto();
+  void flex();
+  void hflex();
+  void hflex1();
+  void flex1();
+  void hstem();
+  void vstem();
+  void hstemhm();
+  void vstemhm();
+
+
+  void callsubr();
 };
 
 #endif
