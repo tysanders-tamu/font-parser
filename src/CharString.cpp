@@ -57,6 +57,7 @@ void CharString::getValsQueue(const std::vector<uint8_t> &vals){
 void CharString::parseVals(){
   int num_count = 0;
   bool getWidth = true;
+  int numHints = 0;
 
   while (!values.empty()){
     uint16_t val = values.front();
@@ -65,7 +66,7 @@ void CharString::parseVals(){
       // Handle two-byte operators
       values.pop();
       val = values.front();
-      uint16_t op_num = 12<<8 | val;
+      uint16_t op_num = 256 + val;
       oper op = {op_num,two_byte_operators[val],num_count};
       values.pop();
       num_count = 0;
@@ -75,6 +76,39 @@ void CharString::parseVals(){
       } else {
         throw("Reserved Operator");
       }
+    } else if (val == 19){
+      // Handle hintmask
+      opers.push_back({19,"hintmask",num_count});
+      values.pop();
+      int numBytes = (numHints + 7) / 8;
+      for (int i = 0; i < numBytes; ++i){
+        uint8_t mask = values.front();
+        values.pop();
+        hintmasks.push_back(mask);
+      }
+    } else if (val == 20){
+      // Handle cntrmask
+      opers.push_back({20,"cntrmask",num_count});
+      values.pop();
+      numHints = h_hints.size() + v_hints.size();
+      int numBytes = (numHints + 7) / 8;
+      for (int i = 0; i < numBytes; ++i){
+        uint8_t mask = values.front();
+        values.pop();
+        hintmasks.push_back(mask);
+      }
+    } else if (val == 28){
+      // Handle two-byte number
+      values.pop();
+      int32_t num = getNextNum();
+      nums.push_back(num);
+      num_count++;
+    } else if (val == 255){
+      // Handle long number
+      values.pop();
+      int32_t num = getNextNum();
+      nums.push_back(num);
+      num_count++;
     } 
     else if (val < 32 && val != 28){
       // Handle one-byte operators
@@ -104,29 +138,477 @@ void CharString::updateValues(){
     if (current_op.name == ""){
       throw("Empty Operator");
     }
-
-    switch(current_op.op_val){
-      case 1: // hstem
-        if (current_op.numCount%2 == 1){
-          width = nominalWidthX + nums[currNum];
-          currNum++;
-          current_op.numCount--;
+    switch (current_op.op_val)
+    {
+    case 1://hstem
+      for (int i = 0; i < current_op.numCount; i+=2){
+        addHint(nums[currNum],nums[currNum+1], false);
+        currNum += 2;
+      }
+      break;
+    case 3://vstem
+      for (int i = 0; i < current_op.numCount; i+=2){
+        addHint(nums[currNum],nums[currNum+1], true);
+        currNum += 2;
+      }
+      break;
+    case 4://vmoveto
+      y_pos += nums[currNum];
+      currNum++;
+      break;
+    case 5://rlineto
+      for (int i = 0; i < current_op.numCount; i+=2){
+        x_pos += nums[currNum];
+        y_pos += nums[currNum+1];
+        addPoint(x_pos, y_pos);
+        currNum += 2;
+      }
+      break;
+    case 6://hlineto
+    bool horizontal = true;
+      for (int i = 0; i < current_op.numCount; i++){
+        if (horizontal){
+          x_pos += nums[currNum];
+          addPoint(x_pos, y_pos);
         } else {
-          width = defaultWidthX;
+          y_pos += nums[currNum];
+          addPoint(x_pos, y_pos);
         }
-        for (int i = 0; i < current_op.numCount; i+=2){
-          addHint(nums[currNum],nums[currNum+1],false);
-          currNum+=2;
+        currNum++;
+      }
+      break;
+    case 7://vlineto
+    bool vertical = true;
+      for (int i = 0; i < current_op.numCount; i++){
+        if (vertical){
+          y_pos += nums[currNum];
+          addPoint(x_pos, y_pos);
+        } else {
+          x_pos += nums[currNum];
+          addPoint(x_pos, y_pos);
         }
-        break;
-      case 3: // vstem
-        for (int i = 0; i < current_op.numCount; i+=2){
-          addHint(nums[currNum],nums[currNum+1],true);
-          currNum+=2;
+        currNum++;
+      }
+      break;
+    case 8://rrcurveto
+      for (int i = 0; i < current_op.numCount; i+=6){
+        x_pos += nums[currNum];
+        y_pos += nums[currNum+1];
+        addPoint(x_pos, y_pos);
+        x_pos += nums[currNum+2];
+        y_pos += nums[currNum+3];
+        addPoint(x_pos, y_pos);
+        x_pos += nums[currNum+4];
+        y_pos += nums[currNum+5];
+        addPoint(x_pos, y_pos);
+        currNum += 6;
+      }
+      break;
+    case 10: //callsubr
+      //callsubr(currNum);
+      break;
+    case 11: //return
+      break;
+    case 12: //escape
+      break;
+    case 14: //endchar
+      return;
+      break;
+    case 18://hstemhm
+      for (int i = 0; i < current_op.numCount; i+=2){
+        addHint(nums[currNum],nums[currNum+1], false);
+        currNum += 2;
+      }
+      break;
+    case 19: //hintmask
+      //handled in parseVals
+      break;
+    case 20: //cntrmask
+      //handled in parseVals
+      break;
+    case 21://rmoveto
+      x_pos += nums[currNum];
+      y_pos += nums[currNum+1];
+      addPoint(x_pos, y_pos);
+      currNum += 2;
+      break;
+    case 22://hmoveto
+      x_pos += nums[currNum];
+      addPoint(x_pos, y_pos);
+      currNum++;
+      break;
+    case 23://vstemhm
+      for (int i = 0; i < current_op.numCount; i+=2){
+        addHint(nums[currNum],nums[currNum+1], true);
+        currNum += 2;
+      }
+      break;
+    case 24://rcurveline
+      for (int i = 0; i < current_op.numCount-2; i+=6){
+        x_pos += nums[currNum];
+        y_pos += nums[currNum+1];
+        addPoint(x_pos, y_pos);
+        x_pos += nums[currNum+2];
+        y_pos += nums[currNum+3];
+        addPoint(x_pos, y_pos);
+        x_pos += nums[currNum+4];
+        y_pos += nums[currNum+5];
+        addPoint(x_pos, y_pos);
+        currNum += 6;
+      }
+      x_pos += nums[currNum];
+      y_pos += nums[currNum+1];
+      addPoint(x_pos, y_pos);
+      currNum += 2;
+      break;
+    case 25://rlinecurve
+      for (int i = 0; i < current_op.numCount-6; i+=2){
+        x_pos += nums[currNum];
+        y_pos += nums[currNum+1];
+        addPoint(x_pos, y_pos);
+        currNum += 2;
+      }
+      x_pos += nums[currNum];
+      y_pos += nums[currNum+1];
+      addPoint(x_pos, y_pos);
+      x_pos += nums[currNum+2];
+      y_pos += nums[currNum+3];
+      addPoint(x_pos, y_pos);
+      x_pos += nums[currNum+4];
+      y_pos += nums[currNum+5];
+      addPoint(x_pos, y_pos);
+      currNum += 6;
+      break;
+    case 26://vvcurveto
+      if (current_op.numCount % 4 != 0){
+        x_pos += nums[currNum];
+        currNum++;
+        addPoint(x_pos, y_pos);
+      }
+      for (int i = 0; i < current_op.numCount; i+=4){
+        y_pos += nums[currNum];
+        addPoint(x_pos, y_pos);
+        x_pos += nums[currNum+1];
+        y_pos += nums[currNum+2];
+        addPoint(x_pos, y_pos);
+        y_pos += nums[currNum+3];
+        currNum += 4;
+      }
+      break;
+    case 27://hhcurveto
+      if (current_op.numCount % 4 != 0){
+        y_pos += nums[currNum];
+        currNum++;
+        addPoint(x_pos, y_pos);
+      }
+      for (int i = 0; i < current_op.numCount; i+=4){
+        x_pos += nums[currNum];
+        addPoint(x_pos, y_pos);
+        x_pos += nums[currNum+1];
+        y_pos += nums[currNum+2];
+        addPoint(x_pos, y_pos);
+        x_pos += nums[currNum+3];
+        currNum += 4;
+      }
+      break;
+    case 29://callgsubr
+      //callgsubr(currNum);
+      break;
+    case 30://vhcurveto
+      bool has_extra = false;
+      if (current_op.numCount % 4 != 0){
+        current_op.numCount--;
+        has_extra = true;
+      }
+      //- dy1 dx2 dy2 dx3 {dxa dxb dyb dyc dyd dxe dye dxf}* dyf? 
+      if ((current_op.numCount-4)%8 == 0){
+        y_pos += nums[currNum];
+        addPoint(x_pos, y_pos);
+        x_pos += nums[currNum+1];
+        y_pos += nums[currNum+2];
+        addPoint(x_pos, y_pos);
+        x_pos += nums[currNum+3];
+        addPoint(x_pos, y_pos);
+        currNum += 4;
+        for(int i = 0; i < current_op.numCount-4; i+=8){
+          x_pos += nums[currNum];//dxa
+          addPoint(x_pos, y_pos);
+          x_pos += nums[currNum+1];//dxb
+          y_pos += nums[currNum+2];//dyb
+          addPoint(x_pos, y_pos);
+          y_pos += nums[currNum+3];//dyc
+          addPoint(x_pos, y_pos);
+          y_pos += nums[currNum+4];//dyd
+          addPoint(x_pos, y_pos);
+          x_pos += nums[currNum+5];//dxe
+          y_pos += nums[currNum+6];//dye
+          addPoint(x_pos, y_pos);
+          x_pos += nums[currNum+7];//dxf
+          addPoint(x_pos, y_pos);
         }
-        break;
-      default:
-        throw("Invalid Operator or Reserved Operator");
+        if (has_extra){//can have an extra point altering the last curve
+          y_pos += nums[currNum];//dyf
+          points.back().y = y_pos;
+          current_op.numCount++;
+          currNum++;
+        }
+      } else{
+        //- {dya dxb dyb dxc dxd dxe dye dyf}+ dxf?
+        for (int i = 0; i < current_op.numCount; i+=8){
+          y_pos += nums[currNum];//dya
+          addPoint(x_pos, y_pos);
+          x_pos += nums[currNum+1];//dxb
+          y_pos += nums[currNum+2];//dyb
+          addPoint(x_pos, y_pos);
+          x_pos += nums[currNum+3];//dxc
+          addPoint(x_pos, y_pos);
+          x_pos += nums[currNum+4];//dxd
+          addPoint(x_pos, y_pos);
+          x_pos += nums[currNum+5];//dxe
+          y_pos += nums[currNum+6];//dye
+          addPoint(x_pos, y_pos);
+          y_pos += nums[currNum+7];//dyf
+          addPoint(x_pos, y_pos);
+          currNum += 8;
+        }
+        if(has_extra){//can have an extra point altering the last curve
+          x_pos += nums[currNum];//dxf
+          points.back().x = x_pos;
+          current_op.numCount++;
+          currNum++;
+        }
+      }
+      break;
+    case 31://hvcurveto
+      bool has_extra = false;
+      if (current_op.numCount % 4 != 0){
+        current_op.numCount--;
+        has_extra = true;
+      }
+      //- dx1 dx2 dy2 dy3 {dya dxb dyb dxc dxd dxe dye dyf}* dxf?
+      if ((current_op.numCount-4)%8 == 0){
+        x_pos += nums[currNum];
+        addPoint(x_pos, y_pos);
+        y_pos += nums[currNum+1];
+        x_pos += nums[currNum+2];
+        addPoint(x_pos, y_pos);
+        y_pos += nums[currNum+3];
+        addPoint(x_pos, y_pos);
+        currNum += 4;
+        for(int i = 0; i < current_op.numCount-4; i+=8){
+          y_pos += nums[currNum];//dya
+          addPoint(x_pos, y_pos);
+          x_pos += nums[currNum+1];//dxb
+          y_pos += nums[currNum+2];//dyb
+          addPoint(x_pos, y_pos);
+          x_pos += nums[currNum+3];//dxc
+          addPoint(x_pos, y_pos);
+          x_pos += nums[currNum+4];//dxd
+          addPoint(x_pos, y_pos);
+          x_pos += nums[currNum+5];//dxe
+          y_pos += nums[currNum+6];//dye
+          addPoint(x_pos, y_pos);
+          y_pos += nums[currNum+7];//dyf
+          addPoint(x_pos, y_pos);
+          currNum += 8;
+        }
+        if (has_extra){//can have an extra point altering the last curve
+          x_pos += nums[currNum];//dxf
+          points.back().x = x_pos;
+          current_op.numCount++;
+          currNum++;
+        }
+      } else{
+        //- {dxa dxb dyb dyc dyd dxe dye dxf}+ dyf?
+        for (int i = 0; i < current_op.numCount; i+=8){
+          x_pos += nums[currNum];//dxa
+          addPoint(x_pos, y_pos);
+          x_pos += nums[currNum+1];//dxb
+          y_pos += nums[currNum+2];//dyb
+          addPoint(x_pos, y_pos);
+          y_pos += nums[currNum+3];//dyc
+          addPoint(x_pos, y_pos);
+          y_pos += nums[currNum+4];//dyd
+          addPoint(x_pos, y_pos);
+          x_pos += nums[currNum+5];//dxe
+          y_pos += nums[currNum+6];//dye
+          addPoint(x_pos, y_pos);
+          x_pos += nums[currNum+7];//dxf
+        }
+        if(has_extra){//can have an extra point altering the last curve
+          y_pos += nums[currNum];//dyf
+          points.back().y = y_pos;
+          current_op.numCount++;
+          currNum++;
+        }
+      }
+      break;
+    case (256+3):
+      //and
+      break;
+    case (256+4):
+      //or
+      break;
+    case (256+5):
+      //not
+      break;
+    case (256+9):
+      //abs
+      break;
+    case (256+10):
+      //add
+      break;
+    case (256+11):
+      //sub
+      break;
+    case (256+12):
+      //div
+      break;
+    case (256+14):
+      //neg
+      break;
+    case (256+15):
+      //eq
+      break;
+    case (256+18):
+      //drop
+      break;
+    case (256+20):
+      //put
+      break;
+    case (256+21):
+      //get
+      break;
+    case (256+22):
+      //ifelse
+      break;
+    case (256+23):
+      //random
+      break;
+    case (256+24):
+      //mul
+      break;
+    case (256+26):
+      //sqrt
+      break;
+    case (256+27):
+      //dup
+      break;
+    case (256+28):
+      //exch
+      break;
+    case (256+29):
+      //index
+      break;
+    case (256+30):
+      //roll
+      break;
+    case (256+34):
+      //hflex
+      //- dx1 dx2 dy2 dx3 dx4 dx5 dx6
+      x_pos += nums[currNum];
+      addPoint(x_pos, y_pos);
+      x_pos += nums[currNum+1];
+      y_pos += nums[currNum+2];
+      addPoint(x_pos, y_pos);
+      x_pos += nums[currNum+3];
+      addPoint(x_pos, y_pos);
+      x_pos += nums[currNum+4];
+      addPoint(x_pos, y_pos);
+      x_pos += nums[currNum+5];
+      addPoint(x_pos, y_pos);
+      x_pos += nums[currNum+6];
+      addPoint(x_pos, y_pos);
+      currNum += 7;
+      flex_depths.push_back(50);
+      break;
+    case (256+35):
+      //flex
+      //- dx1 dy1 dx2 dy2 dx3 dy3 dx4 dy4 dx5 dy5 dx6 dy6 fd
+      x_pos += nums[currNum];//dx1
+      y_pos += nums[currNum+1];//dy1
+      addPoint(x_pos, y_pos);
+      x_pos += nums[currNum+2];//dx2
+      y_pos += nums[currNum+3];//dy2
+      addPoint(x_pos, y_pos);
+      x_pos += nums[currNum+4];//dx3
+      y_pos += nums[currNum+5];//dy3
+      addPoint(x_pos, y_pos);
+      x_pos += nums[currNum+6];//dx4
+      y_pos += nums[currNum+7];//dy4
+      addPoint(x_pos, y_pos);
+      x_pos += nums[currNum+8];//dx5
+      y_pos += nums[currNum+9];//dy5
+      addPoint(x_pos, y_pos);
+      x_pos += nums[currNum+10];//dx6
+      y_pos += nums[currNum+11];//dy6
+      addPoint(x_pos, y_pos);
+      flex_depths.push_back(nums[currNum+12]);//fd
+      currNum += 13;
+      break;
+    case (256+36):
+      //hflex1
+      //- dx1 dy1 dx2 dy2 dx3 dx4 dx5 dy5 dx6
+      x_pos += nums[currNum];//dx1
+      y_pos += nums[currNum+1];//dy1
+      addPoint(x_pos, y_pos);
+      x_pos += nums[currNum+2];//dx2
+      y_pos += nums[currNum+3];//dy2
+      addPoint(x_pos, y_pos);
+      x_pos += nums[currNum+4];//dx3
+      addPoint(x_pos, y_pos);
+      x_pos += nums[currNum+5];//dx4
+      addPoint(x_pos, y_pos);
+      x_pos += nums[currNum+6];//dx5
+      y_pos += nums[currNum+7];//dy5
+      addPoint(x_pos, y_pos);
+      x_pos += nums[currNum+8];//dx6
+      addPoint(x_pos, y_pos);
+      flex_depths.push_back(50);
+      currNum += 9;
+      break;
+    case (256+37):
+      //flex1
+      //- dx1 dy1 dx2 dy2 dx3 dy3 dx4 dy4 dx5 dy5 d6
+      int sumx = 0;
+      int sumy = 0;
+      x_pos += nums[currNum];//dx1
+      sumx += nums[currNum];
+      y_pos += nums[currNum+1];//dy1
+      sumy += nums[currNum+1];
+      addPoint(x_pos, y_pos);
+      x_pos += nums[currNum+2];//dx2
+      sumx += nums[currNum+2];
+      y_pos += nums[currNum+3];//dy2
+      sumy += nums[currNum+3];
+      addPoint(x_pos, y_pos);
+      x_pos += nums[currNum+4];//dx3
+      sumx += nums[currNum+4];
+      y_pos += nums[currNum+5];//dy3
+      sumy += nums[currNum+5];
+      addPoint(x_pos, y_pos);
+      x_pos += nums[currNum+6];//dx4
+      sumx += nums[currNum+6];
+      y_pos += nums[currNum+7];//dy4
+      sumy += nums[currNum+7];
+      addPoint(x_pos, y_pos);
+      x_pos += nums[currNum+8];//dx5
+      sumx += nums[currNum+8];
+      y_pos += nums[currNum+9];//dy5
+      sumy += nums[currNum+9];
+      addPoint(x_pos, y_pos);
+      if (abs(sumx) > abs(sumy)){
+        x_pos += nums[currNum+10];//dx6
+        addPoint(x_pos, y_pos);
+      } else {
+        y_pos += nums[currNum+10];//dy6
+        addPoint(x_pos, y_pos);
+      }
+      flex_depths.push_back(50);
+      currNum += 11;
+      break;
+    default:
+      break;
     }
   }
 }

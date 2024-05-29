@@ -111,9 +111,10 @@ class CharString{
   std::vector<point> points;
   std::vector<hint> h_hints;
   std::vector<hint> v_hints;
-  std::vector<bool> hintmasks;
+  std::vector<uint8_t> hintmasks;
   std::vector<oper> opers;
   std::vector<int32_t> nums;
+  std::vector<int32_t> flex_depths;
   uint width;
   uint defaultWidthX;
   uint nominalWidthX;
