@@ -138,6 +138,12 @@ void CharString::updateValues(){
     if (current_op.name == ""){
       throw("Empty Operator");
     }
+    //init variables for switch statement
+    bool horizontal = true;
+    bool vertical = true;
+    bool has_extra = false;
+    int sumy = 0;
+    int sumx = 0;
     switch (current_op.op_val)
     {
     case 1://hstem
@@ -165,7 +171,7 @@ void CharString::updateValues(){
       }
       break;
     case 6://hlineto
-    bool horizontal = true;
+      horizontal = true;
       for (int i = 0; i < current_op.numCount; i++){
         if (horizontal){
           x_pos += nums[currNum];
@@ -178,7 +184,7 @@ void CharString::updateValues(){
       }
       break;
     case 7://vlineto
-    bool vertical = true;
+      vertical = true;
       for (int i = 0; i < current_op.numCount; i++){
         if (vertical){
           y_pos += nums[currNum];
@@ -315,7 +321,7 @@ void CharString::updateValues(){
       //callgsubr(currNum);
       break;
     case 30://vhcurveto
-      bool has_extra = false;
+      has_extra = false;
       if (current_op.numCount % 4 != 0){
         current_op.numCount--;
         has_extra = true;
@@ -380,7 +386,7 @@ void CharString::updateValues(){
       }
       break;
     case 31://hvcurveto
-      bool has_extra = false;
+      has_extra = false;
       if (current_op.numCount % 4 != 0){
         current_op.numCount--;
         has_extra = true;
@@ -570,8 +576,8 @@ void CharString::updateValues(){
     case (256+37):
       //flex1
       //- dx1 dy1 dx2 dy2 dx3 dy3 dx4 dy4 dx5 dy5 d6
-      int sumx = 0;
-      int sumy = 0;
+      sumx = 0;
+      sumy = 0;
       x_pos += nums[currNum];//dx1
       sumx += nums[currNum];
       y_pos += nums[currNum+1];//dy1

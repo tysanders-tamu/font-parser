@@ -206,8 +206,11 @@ class parserClass
     void hex_to_ascii(uint32_t hex);
     void hex_to_ascii(uint8_t hex);
     void print_hex_data(uint32_t offset, uint32_t length);
-    //! private functions
-    private:
+    vector<uint8_t> get_topDict_data();
+    std::vector<uint8_t> get_charstring_data();
+
+  //! private functions
+  private:
     void read_table_directory();
     void read_table_records();
     void standard_flow();
@@ -221,5 +224,5 @@ class parserClass
     uint32_t read_uint24_t();
     uint32_t read_uint32_t();
     void decode_dict_data(vector<uint8_t> data);
-
+    
 };
