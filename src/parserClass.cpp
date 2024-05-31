@@ -423,3 +423,17 @@ uint32_t parserClass::read_uint32_t(){
   file.read(reinterpret_cast<char*>(&value), sizeof(uint32_t));
   return htonl(value);
 }
+
+vector<uint8_t> parserClass::get_private_data(){
+  return topDictIndex.data;
+}
+
+std::vector<std::vector<uint8_t>> parserClass::get_charstring_data(){
+  std::vector<std::vector<uint8_t>> charstring_data;
+  for (int i = 0; i < charStringIndex.count; i++){
+    uint32_t start = charStringIndex.offsets[i];
+    uint32_t end = charStringIndex.offsets[i+1];
+    charstring_data.push_back(vector<uint8_t>(charStringIndex.data.begin() + start, charStringIndex.data.begin() + end));
+  }
+  return charstring_data;
+}

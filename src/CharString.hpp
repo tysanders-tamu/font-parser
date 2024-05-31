@@ -104,6 +104,7 @@ const std::string two_byte_operators[] = {
 };
 
 class CharString{
+  public:
   CharString():x_pos(0),y_pos(0), defaultWidthX(256), nominalWidthX(256), width(256) {};
   ~CharString(){};
 
@@ -121,12 +122,15 @@ class CharString{
   int x_pos;
   int y_pos;  
 
-  void addPoint(int x, int y);
-  void addHint(int x, int y, bool isV);
+  void addPoint(const int &x, const int &y);
+  void addHint(const int &x,const int &y,const bool &isV);
   int32_t getNextNum();
   void getValsQueue(const std::vector<uint8_t> &vals);
+  void setWidths(const int &defaultWidthX, const int &nominalWidthX);
   void parseVals();
   void updateValues();
+  void printOpers(bool withNums = true) const;
+  void printNums(int start, int end) const;
 };
 
 #endif

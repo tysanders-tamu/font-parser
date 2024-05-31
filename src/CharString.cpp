@@ -1,15 +1,22 @@
+#include <iostream>
 #include "CharString.hpp"
 
-void CharString::addPoint(int x, int y){
+void CharString::addPoint(const int &x, const int & y){
   points.push_back({x,y});
 }
 
-void CharString::addHint(int x, int y, bool isV){
+void CharString::addHint(const int & x, const int & y,const bool &isV){
   if(isV){
     v_hints.push_back({x,y});
   }else{
     h_hints.push_back({x,y});
   }
+}
+
+void CharString::setWidths(const int &defaultWidthX, const int &nominalWidthX){
+  this->defaultWidthX = defaultWidthX;
+  this->nominalWidthX = nominalWidthX;
+  this->width = defaultWidthX;
 }
 
 int32_t CharString::getNextNum(){
@@ -78,7 +85,7 @@ void CharString::parseVals(){
       }
     } else if (val == 19){
       // Handle hintmask
-      opers.push_back({19,"hintmask",num_count});
+      opers.push_back({val,one_byte_operators[val],num_count});
       values.pop();
       int numBytes = (numHints + 7) / 8;
       for (int i = 0; i < numBytes; ++i){
@@ -88,7 +95,7 @@ void CharString::parseVals(){
       }
     } else if (val == 20){
       // Handle cntrmask
-      opers.push_back({20,"cntrmask",num_count});
+      opers.push_back({val,one_byte_operators[val],num_count});
       values.pop();
       numHints = h_hints.size() + v_hints.size();
       int numBytes = (numHints + 7) / 8;
@@ -617,4 +624,29 @@ void CharString::updateValues(){
       break;
     }
   }
+}
+
+void CharString::printNums(int start, int end) const {
+  std::cout << '(';
+  for (auto num : nums){
+    std::cout << "num" << ' ';
+  }
+  std::cout << ')';
+}
+
+void CharString::printOpers(bool withNums) const {
+  if (withNums){
+    for (auto oper : opers){
+      std::cout << oper.name << " ";
+      for (int i = 0; i < oper.numCount; i++){
+        std::cout << nums[i] << " ";
+      }
+    }
+  }
+  else{
+    for (auto oper : opers){
+      std::cout << oper.name << " ";
+    }
+  }
+  std::cout << std::endl;
 }

@@ -190,7 +190,8 @@ class parserClass
     CFFIndex topDictIndex;
     CFFIndex stringIndex;
     CFFIndex globalSubrIndex;
-    CFFIndex charStringIndex;    
+    CFFIndex charStringIndex;   
+    CFFIndex privateIndex; 
     //Dict objects
     vector<pair<int, vector<int>>> decoded_dict_data;
     TopDict top_dict;
@@ -206,8 +207,8 @@ class parserClass
     void hex_to_ascii(uint32_t hex);
     void hex_to_ascii(uint8_t hex);
     void print_hex_data(uint32_t offset, uint32_t length);
-    vector<uint8_t> get_topDict_data();
-    std::vector<uint8_t> get_charstring_data();
+    vector<uint8_t> get_private_data();
+    std::vector<std::vector<uint8_t>> get_charstring_data();
 
   //! private functions
   private:

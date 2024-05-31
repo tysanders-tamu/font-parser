@@ -7,6 +7,7 @@
 #include <inttypes.h>
 #include <GLFW/glfw3.h>
 #include "parserClass.hpp"
+#include "CharString.hpp"
 
 using namespace std;
 
@@ -15,6 +16,24 @@ int main() {
   // string filename = "test.otf";
   string filename = "test2.otf";
   parserClass parser(filename, true);
+  vector<CharString> charstrings;
+  vector<vector<uint8_t>> charstring_raw_data = parser.get_charstring_data();
+  /*
+  //vector<uint8_t> topDict_raw_data = parser.get_private_data();
+
+  for (int i = 0; i < charstring_raw_data.size(); i++) {
+    CharString currentCharstring;
+    currentCharstring.getValsQueue(charstring_raw_data[i]);
+    currentCharstring.setWidths(554,554);
+    currentCharstring.parseVals();
+    currentCharstring.updateValues();
+    currentCharstring.printOpers();
+  }
+  */
+
+  //parse charstring
+
+
 
   cout << "\n";
   // parser.print_table_records();
