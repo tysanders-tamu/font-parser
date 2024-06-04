@@ -1,39 +1,66 @@
 cmake_minimum_required(VERSION 3.11)
+project(font-parser)
 
-project(MyProject)
-include(FetchContent)
-
-# Set C++ version
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-# Add fmt library
-FetchContent_Declare(
-        fmt
-        GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-        GIT_TAG 10.2.1
-)
-FetchContent_GetProperties(fmt)
-if(NOT fmt_POPULATED)
-        FetchContent_Populate(fmt)
-        add_subdirectory(${fmt_SOURCE_DIR} ${fmt_BINARY_DIR})
-endif()
+# Set the C++ standard
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+#flags
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -std=c++11")
 
 
+#GFLW options
+option (GLFW_INSTALL OFF)
+option (GLFW_BUILD_DOCS OFF)
+option (GLFW_BUILD_EXAMPLES OFF)
+option (GLFW_BUILD_TESTS OFF)
 
+# Add subdirectories for dependencies
+add_subdirectory(deps/glfw)
+add_subdirectory(deps/fmt)
+
+# Include directories for dependencies
 include_directories(
-        ${PROJECT_SOURCE_DIR}/src
+  src/
+  deps/glfw/include/
+  deps/fmt/include/
 )
 
-file(GLOB SOURCE_FILES
-        "${PROJECT_SOURCE_DIR}/include/*.h"
-        "${PROJECT_SOURCE_DIR}/include/*.hpp"
-        "${PROJECT_SOURCE_DIR}/src/*.cpp"
-        "${PROJECT_SOURCE_DIR}/src/*.c"
+# Collect all source files
+file(GLOB_RECURSE HEADER_FILES
+    src/*.h
+    src/*.hpp
 )
 
-# Add executable target
-add_executable(out ${SOURCE_FILES})
+file(GLOB_RECURSE SOURCE_FILES
+    src/*.cpp
+    src/*.h
+    src/*.hpp
+)
 
-# Link fmt library
-target_link_libraries(out PRIVATE fmt::fmt glfw)
+#group
+source_group("headers" FILES ${HEADER_FILES})
+source_group("sources" FILES ${SOURCE_FILES})
+
+# Set the output directories
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+
+# Executable
+add_executable(font-parser ${SOURCE_FILES})
+
+# Link libraries
+add_definitions (-DGLFW_INCLUDE_NONE
+                 -DPROJECT_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\")
+
+target_link_libraries(font-parser 
+                      glfw
+                      ${GLFW_LIBRARIES})
+                      
+target_link_libraries(font-parser
+                      fmt
+                      glfw
+                      ${GLFW_LIBRARIES})
+
+set_target_properties(font-parser PROPERTIES
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)                      
