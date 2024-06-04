@@ -4,3 +4,7 @@
 [submodule "deps/fmt"]
 	path = deps/fmt
 	url = https://github.com/fmtlib/fmt
+[submodule "deps/glad"]
+	path = deps/glad
+	url = https://github.com/Dav1dde/glad
+	branch = c

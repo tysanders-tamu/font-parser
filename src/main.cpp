@@ -5,78 +5,58 @@
 #include <fmt/core.h>
 #include <arpa/inet.h>
 #include <inttypes.h>
+
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
 #include "parserClass.hpp"
 
 using namespace std;
 
+static void glfwErrorCallback(int error, const char *description)
+{
+    fprintf(stderr, "GLFW returned an error:\n\t%s (%i)\n", description, error);
+}
+
+GLFWwindow* initialise() {
+  if (!glfwInit()) {
+    fmt::print("Failed to initialise GLFW\n");
+    exit(EXIT_FAILURE);
+  }
+
+
+    glfwSetErrorCallback(glfwErrorCallback);
+
+  // Create a window
+  GLFWwindow* window = glfwCreateWindow(800, 600, "Font Parser", NULL, NULL);
+  if (!window) {
+    fmt::print("Failed to create GLFW window\n");
+    glfwTerminate();
+    exit(EXIT_FAILURE);
+  }
+
+  // Make the window the current context
+  glfwMakeContextCurrent(window);
+
+  return window;
+}
+
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, GLFW_TRUE);
+}
+
 int main() {
-  //substantiate class
-  // string filename = "test.otf";
-  string filename = "test2.otf";
-  parserClass parser(filename, true);
+  GLFWwindow* window = initialise();
 
-  cout << "\n";
-  // parser.print_table_records();
-  
-    // ifstream file("Helvetica.otf", ios::binary);
-    // if (!file.is_open()) {
-    //     cerr << "Error opening file!" << endl;
-    //     return 1;
-    // }
+  while(!glfwWindowShouldClose(window)) {
+    glfwPollEvents();
+  }
 
-    // // Read the table directory
-    // TableDirectory dir = readTableDirectory(file);
-    // TableRecords records = readTableRecords(file, dir);
+  glfwTerminate();
 
-    // // Print the SFNT version and the number of tables
-    // printTableDirectory(dir);
-    // printTableRecords(records);
-
-    // //get cmap
-    // //get record entry for cmap
-    // TableRecord cmapRecord;
-    // //find relevant entry
-
-
-    // file.close();
-
-
-    // // glfw testing
-    // if (!glfwInit())
-    //   {
-    //     fmt::print("Failed to initialize GLFW\n");
-    //   }
-
-    
-    // glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-    // glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    
-
-    // GLFWwindow* window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
-    // if (!window)
-    //   {
-    //     fmt::print("Failed to create window\n");
-    //     glfwTerminate();
-    //   }
-
-
-    // // /////////////////////////////////
-    // // // OpenGL setup
-    // // glViewport(0, 0, 640, 480);
-    // // /////////////////////////////////
-
-    // glfwSetKeyCallback(window, key_callback);
-    // glfwMakeContextCurrent(window);
-
-    // // while (!glfwWindowShouldClose(window))
-    // //   {
-    // //       glfwPollEvents();
-    // //   }
-
-    // glfwDestroyWindow(window);
-    // glfwTerminate();
-    // return 0;
+  return EXIT_SUCCESS;
 }
 
 
