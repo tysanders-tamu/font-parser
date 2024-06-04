@@ -24,6 +24,13 @@ struct oper{
   int numCount;
 };
 
+struct byte_parser{ //vector parser helper struct. Keeps position between functions
+  std::vector<uint8_t> vals; //values in the charstring
+  int oper_pos; //position in the operators vector
+  int pos; //position in the vector
+  // std::vector<uint8_t> subrs;
+};
+
 
 //reserved operators left blank
 const std::string one_byte_operators[] = {
@@ -107,7 +114,8 @@ class CharString{
   CharString():x_pos(0),y_pos(0), defaultWidthX(256), nominalWidthX(256), width(256) {};
   ~CharString(){};
 
-  std::queue<uint8_t> values;
+  // std::queue<uint8_t> values;
+  byte_parser parser;
   std::vector<point> points;
   std::vector<hint> h_hints;
   std::vector<hint> v_hints;
@@ -127,7 +135,7 @@ class CharString{
   void parseVals();
   void updateValues();
 
-  void rmoveto(const int &currNum);
+  void rmoveto();
   void hmoveto();
   void vmoveto();
   void rlineto();

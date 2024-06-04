@@ -76,7 +76,7 @@ int main() {
 
     // glfwDestroyWindow(window);
     // glfwTerminate();
-    // return 0;
+    return 0;
 }
 
 
