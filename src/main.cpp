@@ -25,7 +25,7 @@ GLFWwindow* initialise() {
   }
 
 
-    glfwSetErrorCallback(glfwErrorCallback);
+  glfwSetErrorCallback(glfwErrorCallback);
 
   // Create a window
   GLFWwindow* window = glfwCreateWindow(800, 600, "Font Parser", NULL, NULL);
@@ -35,16 +35,19 @@ GLFWwindow* initialise() {
     exit(EXIT_FAILURE);
   }
 
+  fmt::print("Successfully created GLFW window\n");
+
   // Make the window the current context
   glfwMakeContextCurrent(window);
+  // glViewport(0, 0, 800, 600);
 
   return window;
 }
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
+    // if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    //     glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
 
 int main() {

@@ -31,7 +31,7 @@ include_directories(
 )
 
 # Collect all source, header, dependency files
-file (GLOB DEPENDENCY_FILES gloom/vendor/glad/src/glad.c)
+file (GLOB DEPENDENCY_FILES deps/glad/src/glad.c)
 
 file(GLOB_RECURSE HEADER_FILES
     src/*.h
@@ -40,8 +40,6 @@ file(GLOB_RECURSE HEADER_FILES
 
 file(GLOB_RECURSE SOURCE_FILES
     src/*.cpp
-    src/*.h
-    src/*.hpp
 )
 
 #group
@@ -60,12 +58,8 @@ add_executable(font-parser ${SOURCE_FILES} ${HEADER_FILES} ${DEPENDENCY_FILES})
 add_definitions (-DGLFW_INCLUDE_NONE
                  -DPROJECT_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\")
 
-target_link_libraries(font-parser 
-                      glfw
-                      ${GLFW_LIBRARIES}
-                      ${GLAD_LIBRARIES})
-                      
 target_link_libraries(font-parser
                       fmt
                       glfw
-                      ${GLFW_LIBRARIES})
+                      ${GLFW_LIBRARIES}
+                      ${GLAD_LIBRARIES})
