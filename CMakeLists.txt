@@ -60,7 +60,3 @@ target_link_libraries(font-parser
                       fmt
                       glfw
                       ${GLFW_LIBRARIES})
-
-set_target_properties(font-parser PROPERTIES
-                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)                      
