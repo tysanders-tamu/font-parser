@@ -11,6 +11,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 #flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -std=c++17")
 
+#freetype?
+find_package(Freetype REQUIRED)
+
 #GLAD specific
 set(GLAD_LIBRARIES dl)
 
@@ -32,6 +35,7 @@ include_directories(
   deps/glad/include/
   deps/glfw/include/
   deps/fmt/include/
+  ${FREETYPE_INCLUDE_DIRS}
 )
 
 # Collect all source, header, dependency files
@@ -73,4 +77,7 @@ target_link_libraries(${PROJECT_NAME}
                       fmt
                       glfw
                       ${GLFW_LIBRARIES}
-                      ${GLAD_LIBRARIES})
+                      ${GLAD_LIBRARIES}
+                      ${FREETYPE_LIBRARIES}
+                      )
+                    
