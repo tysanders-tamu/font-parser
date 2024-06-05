@@ -11,6 +11,7 @@
 
 #include "parserClass.hpp"
 #include "windowing_util.hpp"
+#include "letter.hpp"
 
 #include <unistd.h>
 
@@ -118,6 +119,8 @@ int main() {
   }
 
 
+
+
   //CHANGE LETTER HERE
   FT_UInt glyph_index = FT_Get_Char_Index(face, 'A');
   if (FT_Load_Glyph(face, glyph_index, FT_LOAD_NO_SCALE)) {
@@ -129,6 +132,9 @@ int main() {
     std::cerr << "Glyph is not in outline format\n";
     return 1;
   }
+  
+  letter A(face, 'A', 16, 800, 600);
+  A.print_contours();
 
   FT_Glyph glyph;
   if (FT_Get_Glyph(face->glyph, &glyph)) {
@@ -216,7 +222,7 @@ int main() {
   std::vector<GLfloat> outline_points;
   int i = 0;
 
-  int resolution = 100;
+  int resolution = 1000;
 
 
   //! last needs to connect to first
@@ -336,6 +342,10 @@ int main() {
     glDeleteProgram(shaderProgram);
 
     glfwTerminate();
+    //test class
+
+
+
 
     print_outline(&face->glyph->outline);
 
