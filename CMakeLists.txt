@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.11)
 project(font-parser)
 
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set (CMAKE_VERBOSE_MAKEFILE 0) # 1 should be used for debugging
+set (CMAKE_SUPPRESS_REGENERATION TRUE) # Suppresses ZERO_CHECK
+
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -42,23 +46,30 @@ file(GLOB_RECURSE SOURCE_FILES
     src/*.cpp
 )
 
+file(GLOB CONFIG_FILES
+    CMakeLists.txt
+    .gitignore
+    .gitmodules
+)
+
 #group
 source_group("headers" FILES ${HEADER_FILES})
 source_group("sources" FILES ${SOURCE_FILES})
 source_group("dependencies" FILES ${DEPENDENCY_FILES})
+source_group("config" FILES ${CONFIG_FILES})
 
 # Set the output directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # Executable
-add_executable(font-parser ${SOURCE_FILES} ${HEADER_FILES} ${DEPENDENCY_FILES})
+add_executable(font-parser ${SOURCE_FILES} ${HEADER_FILES} ${DEPENDENCY_FILES} ${CONFIG_FILES})
 
 # Link libraries
 add_definitions (-DGLFW_INCLUDE_NONE
                  -DPROJECT_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\")
 
-target_link_libraries(font-parser
+target_link_libraries(${PROJECT_NAME}
                       fmt
                       glfw
                       ${GLFW_LIBRARIES}
