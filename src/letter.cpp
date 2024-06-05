@@ -3,7 +3,9 @@
 letter::letter(FT_Face face, char symbol, int resolution, int screen_width, int screen_height)
 : symbol(symbol), resolution(resolution), screen_width(screen_width), screen_height(screen_height)
 {
-
+  //init n_contours
+  n_contours = face->glyph->outline.n_contours;
+  
   if ( face->glyph->format != FT_GLYPH_FORMAT_OUTLINE) {
       std::cerr << "Glyph format is not outline." << std::endl;
       return;
@@ -27,38 +29,40 @@ letter::letter(FT_Face face, char symbol, int resolution, int screen_width, int 
 
     std::vector<GLfloat> contour;
 
-    int i = start;
+
+    int itr = start;
+    fmt::print("start: {0}, end: {1}\n", start, end);
     for (;;)
     {
       //if linear, linearlly interpolate
-      if ( outline->tags[i + 1] & FT_CURVE_TAG_ON) {
+      if ( outline->tags[itr + 1] & FT_CURVE_TAG_ON) {
         for (int j = 0; j < resolution; j++){
           FT_Vector point;
-          linear_interpolation(point,  outline->points[i],  outline->points[i + 1], j / float(resolution));
+          linear_interpolation(point,  outline->points[itr],  outline->points[itr + 1], j / float(resolution));
           contour.push_back(point.x);
           contour.push_back(point.y);
           contour.push_back(0.0f);
         }
-        i += 1;
+        itr += 1;
       }
-      else if (  outline->tags[i + 1] & FT_CURVE_TAG_CUBIC) {
-        FT_Vector p0 =  outline->points[i];
-        FT_Vector p1 =  outline->points[i + 1];
-        FT_Vector p2 =  outline->points[i + 2];
-        FT_Vector p3 =  outline->points[i + 3];
+      else if (  outline->tags[itr + 1] & FT_CURVE_TAG_CUBIC) {
+        FT_Vector p0 =  outline->points[itr];
+        FT_Vector p1 =  outline->points[itr + 1];
+        FT_Vector p2 =  outline->points[itr + 2];
+        FT_Vector p3 =  outline->points[itr + 3];
 
         std::vector<GLfloat> cubic_curve_points = get_cubic_curve_points(p0, p1, p2, p3, resolution);
         contour.insert(contour.end(), cubic_curve_points.begin(), cubic_curve_points.end());
-        i += 3;
+        itr += 3;
       }
 
-      if (i >= end) break;
+      if (itr == end) break;
     }
 
-    //close the curve
+    // close the curve
     for (int j = 0; j < resolution; j++){
       FT_Vector point;
-      linear_interpolation(point,   outline->points[end-1],   outline->points[start], j / float(resolution));
+      linear_interpolation(point,   outline->points[itr],   outline->points[start], j / float(resolution));
       contour.push_back(point.x);
       contour.push_back(point.y);
       contour.push_back(0.0f);
@@ -116,8 +120,9 @@ std::vector<GLfloat> letter::get_cubic_curve_points(FT_Vector p0, FT_Vector p1, 
 void letter::normalize_coordinates(){
   for (size_t i = 0; i < n_contours; ++i){
     for (size_t j = 0; j < contours[i].size(); j += 3){
-      contours[i][j] = ((contours[i][j] - bbox.xMin) / (bbox.xMax - bbox.xMin) - 0.5f);
-      contours[i][j + 1] = ((contours[i][j + 1] - bbox.yMin) / (bbox.yMax - bbox.yMin) -0.5f);
+      // fmt::print("[{},{},{}]\n", contours[i][j], contours[i][j + 1], contours[i][j + 2]);
+      contours[i][j] = ((contours[i][j] - bbox.xMin) / (bbox.xMax - bbox.xMin)) - 0.5f;
+      contours[i][j + 1] = ((contours[i][j + 1] - bbox.yMin) / (bbox.yMax - bbox.yMin)) -0.5f;
     }
   }
 }

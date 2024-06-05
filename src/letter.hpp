@@ -5,6 +5,9 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+
+#include <fmt/core.h>
+#include <fmt/color.h>
 #include <vector>
 
 class letter

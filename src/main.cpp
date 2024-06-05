@@ -14,6 +14,7 @@
 #include "letter.hpp"
 
 #include <unistd.h>
+#include <cassert>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -133,8 +134,8 @@ int main() {
     return 1;
   }
   
-  letter A(face, 'A', 16, 800, 600);
-  A.print_contours();
+  letter A(face, 'A', 1600, 800, 600);
+  // A.print_contours();
 
   FT_Glyph glyph;
   if (FT_Get_Glyph(face->glyph, &glyph)) {
@@ -213,67 +214,32 @@ int main() {
   glDeleteShader(fragmentShader);
 
 
-  //get points
-  // print_outline(&face->glyph->outline);
-  FT_BBox bbox;
-  FT_Glyph_Get_CBox(glyph, FT_GLYPH_BBOX_UNSCALED, &bbox);
 
-  //get only on curve points
-  std::vector<GLfloat> outline_points;
-  int i = 0;
-
-  int resolution = 1000;
-
-
-  //! last needs to connect to first
-  for(;;){
-    //if linear, linearlly interpolate
-    if (face->glyph->outline.tags[i + 1] & FT_CURVE_TAG_ON){
-      for (int j = 0; j < resolution; j++){
-        FT_Vector point;
-        linear_interpolation(point, face->glyph->outline.points[i], face->glyph->outline.points[i + 1], j / float(resolution));
-        outline_points.push_back(point.x);
-        outline_points.push_back(point.y);
-        outline_points.push_back(0.0f);
-      }
-      i += 1;
+  /* //////////////////////
+          LETTERS
+  *////////////////////////
+  //get countours from letter
+  vector<vector<GLfloat>> contours = A.get_contours();
+  //combine to one vector
+  vector<GLfloat> contour_points;
+  for (size_t i = 0; i < contours.size(); ++i){
+    for (size_t j = 0; j < contours[i].size(); ++j){
+      contour_points.push_back(contours[i][j]);
     }
-    else if (face->glyph->outline.tags[i + 1] & FT_CURVE_TAG_CUBIC){
-      FT_Vector p0 = face->glyph->outline.points[i];
-      FT_Vector p1 = face->glyph->outline.points[i + 1];
-      FT_Vector p2 = face->glyph->outline.points[i + 2];
-      FT_Vector p3 = face->glyph->outline.points[i + 3];
-
-      vector<GLfloat> cubic_curve_points = get_cubic_curve_points(p0, p1, p2, p3, resolution);
-      outline_points.insert(outline_points.end(), cubic_curve_points.begin(), cubic_curve_points.end());
-      i += 3;
-    }
-
-
-    if (i >= face->glyph->outline.n_points)
-      break;
+  }
+  //convert to array
+  GLfloat points[contour_points.size()];
+  for (size_t i = 0; i < contour_points.size(); ++i){
+    points[i] = contour_points[i];
   }
 
+  //print out the points
+  // for (size_t i = 0; i < contour_points.size(); i += 3){
+  //   fmt::print("[{},{},{}]\n", points[i], points[i + 1], points[i + 2]);
+  // }
 
 
-  //translates to normalized coordinates, scales to be positive
-  for (int i = 0; i < outline_points.size(); i += 3) {
-        outline_points[i] = ( (outline_points[i] + abs(bbox.xMin) )/float(abs(bbox.xMin) + abs(bbox.xMax)) ); //x
-        outline_points[i+1] = ( (outline_points[i+1] + abs(bbox.yMin) )/float(abs(bbox.yMin) + abs(bbox.yMax)) ); //y
-        //z stays the same
-  }
-
-  //translate to be centered
-  for (int i = 0; i < outline_points.size(); i += 3) {
-      outline_points[i] -= 0.5f;
-      outline_points[i + 1] -= 0.5f;
-  }
-
-  // convert vector to array
-  GLfloat points[outline_points.size()];
-  for (int i = 0; i < outline_points.size(); i++) {
-      points[i] = outline_points[i];
-  }
+  // assert(sizeof(points) == outline_points.size());
 
     // Set up vertex buffer and vertex array objects
     GLuint VBO, VAO;
@@ -304,13 +270,6 @@ int main() {
     //! add timing function, so that it renders at a certain speed, regardless of the speed of the computer
     while (!glfwWindowShouldClose(window))
     {
-        double currentTime = glfwGetTime();
-        frameCount++;
-        if ( currentTime - previousTime >= 1.0 ){
-            fmt::print("FPS: {}\n", frameCount);
-            frameCount = 0;
-            previousTime = currentTime;
-        }
         // Input
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, true);
@@ -324,16 +283,13 @@ int main() {
 
         
         //slowly render points
-        glDrawArrays(GL_POINTS, 0, frame);
+        glDrawArrays(GL_POINTS, 0, sizeof(points));
         glBindVertexArray(0);
 
         // Swap buffers and poll events
         glfwSwapBuffers(window);
         glfwPollEvents();
 
-        frame+=3;
-        if (frame >= outline_points.size() / 3)
-            frame = 0;
     }
 
     // Cleanup
