@@ -42,23 +42,24 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
 
 void print_outline(const FT_Outline* outline) {
-    for (int i = 0; i < outline->n_contours; i++) {
-        int start = (i == 0) ? 0 : outline->contours[i - 1] + 1;
-        int end = outline->contours[i];
+    for (int contour = 0; contour < outline->n_contours; contour++) {
+        int start = (contour == 0) ? 0 : outline->contours[contour - 1] + 1;
+        int end = outline->contours[contour];
+        std::cout << "Contour " << contour << ":\n";
 
-        for (int j = start; j <= end; j++) {
-            FT_Vector point = outline->points[j];
-            char tag = outline->tags[j];
+        for (int i = start; i <= end; i++) {
+            FT_Vector point = outline->points[i];
+            char tag = outline->tags[i];
             if (tag & FT_CURVE_TAG_ON) {
-                std::cout << "On curve point: (" << point.x << ", " << point.y << ")\n";
+                std::cout << "  On curve point: (" << point.x << ", " << point.y << ")\n";
             } else if (tag & FT_CURVE_TAG_CUBIC) {
-                std::cout << "Cubic control point: (" << point.x << ", " << point.y << ")\n";
+                std::cout << "  Cubic control point: (" << point.x << ", " << point.y << ")\n";
             } else {
-                std::cout << "Quadratic control point: (" << point.x << ", " << point.y << ")\n";
+                std::cout << "  Quadratic control point: (" << point.x << ", " << point.y << ")\n";
             }
         }
+        std::cout << "\n";
     }
-  fmt::print("\n\n");
 }
 
 void linear_interpolation(FT_Vector& dest, FT_Vector p0, FT_Vector p1, float t) {
@@ -118,7 +119,7 @@ int main() {
 
 
   //CHANGE LETTER HERE
-  FT_UInt glyph_index = FT_Get_Char_Index(face, 'a');
+  FT_UInt glyph_index = FT_Get_Char_Index(face, 'A');
   if (FT_Load_Glyph(face, glyph_index, FT_LOAD_NO_SCALE)) {
     std::cerr << "Could not load glyph\n";
     return 1;
@@ -284,34 +285,49 @@ int main() {
     glBindBuffer(GL_ARRAY_BUFFER, 0); 
     glBindVertexArray(0); 
 
-    glPointSize(5.0f);
+    glPointSize(4.0f);
 
     // Render loop
     int frame = 0;
+
+    double previousTime = glfwGetTime();
+    int frameCount = 0;
+
+    glfwSwapInterval(0);
+
+    //! add timing function, so that it renders at a certain speed, regardless of the speed of the computer
     while (!glfwWindowShouldClose(window))
     {
-        frame++;
+        double currentTime = glfwGetTime();
+        frameCount++;
+        if ( currentTime - previousTime >= 1.0 ){
+            fmt::print("FPS: {}\n", frameCount);
+            frameCount = 0;
+            previousTime = currentTime;
+        }
         // Input
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, true);
 
-        if (frame > 30){
-          // Render
-          glClear(GL_COLOR_BUFFER_BIT);
+        // Render
+        glClear(GL_COLOR_BUFFER_BIT);
 
-          // Draw points
-          glUseProgram(shaderProgram);
-          glBindVertexArray(VAO);
+        // Draw points
+        glUseProgram(shaderProgram);
+        glBindVertexArray(VAO);
 
-          
-          
-          glDrawArrays(GL_POINTS, 0, outline_points.size() / 3);
-          glBindVertexArray(0);
-        }
+        
+        //slowly render points
+        glDrawArrays(GL_POINTS, 0, frame);
+        glBindVertexArray(0);
 
         // Swap buffers and poll events
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+        frame+=3;
+        if (frame >= outline_points.size() / 3)
+            frame = 0;
     }
 
     // Cleanup
@@ -320,6 +336,8 @@ int main() {
     glDeleteProgram(shaderProgram);
 
     glfwTerminate();
+
+    print_outline(&face->glyph->outline);
 
     return 0;
 }
