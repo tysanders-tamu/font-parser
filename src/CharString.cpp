@@ -47,11 +47,11 @@ void CharString::addHint(int x, int y, bool isV){
 //   return result;
 // }
 
-void CharString::getValsQueue(const std::vector<uint8_t> &vals){
-  for (auto val : vals){
-    values.push(val);
-  }
-}
+// void CharString::getValsQueue(const std::vector<uint8_t> &vals){
+//   for (auto val : vals){
+//     vals.push(val);
+//   }
+// }
 
 // Parse the values in the values queue and populate the opers and nums vectors
 // void CharString::parseVals(){
@@ -392,28 +392,190 @@ void CharString::hvcurveto(){
   while (isNum(parser.vals[parser.pos])){
     args.push_back(getNextNum());
   }
-  if (args.size() % 4 != 0){
+  int extra_arg = args.size() % 4;
+  if(extra_arg > 1){
     throw("Invalid number of arguments for hvcurveto");
   }
-  for (int i = 0; i < args.size(); i+=4){
-    if (i % 2 == 0){
+  bool x_or_y_first = true; //true for x, false for y
+  for (int i = 0; i < args.size()-extra_arg; i+=4){
+    if (x_or_y_first){
       x_pos += args[i];
+      addPoint(x_pos, y_pos);
+      x_pos += args[i+1];
+      y_pos += args[i+2];
+      addPoint(x_pos, y_pos);
+      y_pos += args[i+3];
+      addPoint(x_pos, y_pos);
+      x_or_y_first = false;
     } else {
       y_pos += args[i];
-    }
-    addPoint(x_pos, y_pos);
-    if (i % 2 == 0){
-      y_pos += args[i+1];
-    } else {
+      addPoint(x_pos, y_pos);
       x_pos += args[i+1];
-    }
-    addPoint(x_pos, y_pos);
-    if (i % 2 == 0){
-      x_pos += args[i+2];
-    } else {
       y_pos += args[i+2];
+      addPoint(x_pos, y_pos);
+      x_pos += args[i+3];
+      addPoint(x_pos, y_pos);
+      x_or_y_first = true;
     }
+  }
+  if (extra_arg == 1){
+    if (x_or_y_first){
+      x_pos += args[args.size()-1];
+      points.at(points.size()-1).x = x_pos;
+    } else {
+      y_pos += args[args.size()-1];
+      points.at(points.size()-1).y = y_pos;
+    }
+  }
+};
+
+void CharString::rcurveline(){
+  std::vector<int32_t> args;
+  while (isNum(parser.vals[parser.pos])){
+    args.push_back(getNextNum());
+  }
+  if (args.size()-2 % 6 != 0){
+    throw("Invalid number of arguments for rcurveline");
+  }
+  for (int i = 0; i < args.size()-2; i+=6){
+    x_pos += args[i];
+    y_pos += args[i+1];
+    addPoint(x_pos, y_pos);
+    x_pos += args[i+2];
+    y_pos += args[i+3];
+    addPoint(x_pos, y_pos);
+    x_pos += args[i+4];
+    y_pos += args[i+5];
+    addPoint(x_pos, y_pos);
+  }
+  x_pos += args[args.size()-2];
+  y_pos += args[args.size()-1];
+  addPoint(x_pos, y_pos);
+};
+
+void CharString::rlinecurve(){
+  std::vector<int32_t> args;
+  while (isNum(parser.vals[parser.pos])){
+    args.push_back(getNextNum());
+  }
+  if (args.size()-6 % 2 != 0){
+    throw("Invalid number of arguments for rlinecurve");
+  }
+  for (int i = 0; i < args.size()-6; i+=2){
+    x_pos += args[i];
+    y_pos += args[i+1];
+    addPoint(x_pos, y_pos);
+  }
+    x_pos += args[args.size()-6];
+    y_pos += args[args.size()-5];
+    addPoint(x_pos, y_pos);
+    x_pos += args[args.size()-4];
+    y_pos += args[args.size()-3];
+    addPoint(x_pos, y_pos);
+    x_pos += args[args.size()-2];
+    y_pos += args[args.size()-1];
+    addPoint(x_pos, y_pos);
+};
+
+void CharString::vhcurveto(){
+  std::vector<int32_t> args;
+  while (isNum(parser.vals[parser.pos])){
+    args.push_back(getNextNum());
+  }
+  int extra_arg = args.size() % 4;
+  if(extra_arg > 1){
+    throw("Invalid number of arguments for vhcurveto");
+  }
+  bool x_or_y_first = false; //true for x, false for y
+  for (int i = 0; i < args.size()-extra_arg; i+=4){
+    if (x_or_y_first){
+      x_pos += args[i];
+      addPoint(x_pos, y_pos);
+      y_pos += args[i+1];
+      addPoint(x_pos, y_pos);
+      x_pos += args[i+2];
+      addPoint(x_pos, y_pos);
+      x_or_y_first = false;
+    } else {
+      y_pos += args[i];
+      addPoint(x_pos, y_pos);
+      x_pos += args[i+1];
+      addPoint(x_pos, y_pos);
+      y_pos += args[i+2];
+      addPoint(x_pos, y_pos);
+      x_or_y_first = true;
+    }
+  }
+  if (extra_arg == 1){
+    if (x_or_y_first){
+      x_pos += args[args.size()-1];
+      points.at(points.size()-1).x = x_pos;
+    } else {
+      y_pos += args[args.size()-1];
+      points.at(points.size()-1).y = y_pos;
+    }
+  }
+};
+
+void CharString::vvcurveto(){
+  std::vector<int32_t> args;
+  while (isNum(parser.vals[parser.pos])){
+    args.push_back(getNextNum());
+  }
+  int extra_arg = args.size() % 4;
+  if(extra_arg > 1){
+    throw("Invalid number of arguments for vvcurveto");
+  }
+  if (extra_arg > 0){
+    x_pos += args[0];
+  }
+  for (int i = extra_arg; i < args.size(); i+=4){
+    y_pos += args[i];
+    addPoint(x_pos, y_pos);
+    x_pos += args[i+1];
+    y_pos += args[i+2];
+    addPoint(x_pos, y_pos);
+    y_pos += args[i+3];
     addPoint(x_pos, y_pos);
   }
 };
 
+void CharString::flex(){
+  
+  x_pos += getNextNum();
+  y_pos += getNextNum();
+  addPoint(x_pos, y_pos);
+  x_pos += getNextNum();
+  y_pos += getNextNum();
+  addPoint(x_pos, y_pos);
+  x_pos += getNextNum();
+  y_pos += getNextNum();
+  addPoint(x_pos, y_pos);
+  x_pos += getNextNum();
+  y_pos += getNextNum();
+  addPoint(x_pos, y_pos);
+  x_pos += getNextNum();
+  y_pos += getNextNum();
+  addPoint(x_pos, y_pos);
+  x_pos += getNextNum();
+  y_pos += getNextNum();
+  addPoint(x_pos, y_pos);
+  int32_t fd = getNextNum();
+};
+
+void CharString::hflex(){
+  x_pos += getNextNum();
+  addPoint(x_pos, y_pos);
+  x_pos += getNextNum();
+  y_pos += getNextNum();
+  addPoint(x_pos, y_pos);
+  x_pos += getNextNum();
+  addPoint(x_pos, y_pos);
+  x_pos += getNextNum();
+  addPoint(x_pos, y_pos);
+  x_pos += getNextNum();
+  y_pos += getNextNum();
+  addPoint(x_pos, y_pos);
+  x_pos += getNextNum();
+  addPoint(x_pos, y_pos);
+};
